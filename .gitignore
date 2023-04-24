@@ -2,6 +2,17 @@
 .Rhistory
 .Rapp.history
 
+# Targets
+!meta
+meta/*
+!meta/meta
+
+# Data folder
+Data/
+
+# Mac Specific
+.DS_Store
+
 # Session Data files
 .RData
 .RDataTmp
