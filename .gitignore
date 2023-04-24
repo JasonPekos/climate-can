@@ -3,9 +3,9 @@
 .Rapp.history
 
 # Targets
-!meta
-meta/*
-!meta/meta
+_targets/!meta
+_targets/meta/*
+_targets/!meta/meta
 
 # Data folder
 Data/
