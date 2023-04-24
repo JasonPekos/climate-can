@@ -3,6 +3,7 @@
 .Rapp.history
 
 # Targets
+_targets/
 _targets/!meta
 _targets/meta/*
 _targets/!meta/meta
