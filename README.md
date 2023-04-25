@@ -1,7 +1,7 @@
 # climate-can
 climate and productivity 
 
-Scratch: [html preview](https://htmlpreview.github.io/?https://github.com/JasonPekos/climate-can/blob/main/Scratch.html).
+Scratch: [html preview](https://jasonpekos.quarto.pub/climate-and-productivity-ebde/).
 
 
 # Note on Targets
@@ -18,7 +18,9 @@ The keynotes for running this package are:
 6. To load the results of a target *into memory*, run `tar_load(object_name)`.
 
 # What's new?
-Added ObservableJS cells to the [scratch document](https://htmlpreview.github.io/?https://github.com/JasonPekos/climate-can/blob/main/Scratch.html).
+Added ObservableJS cells to the [scratch document](https://jasonpekos.quarto.pub/climate-and-productivity-ebde/), which has been renamed 
+and moved to a subdirectory.
+
 This allows you to upload a geojson file (you want the raw file for this), and then examine the census geography at a deeper level. 
 
 But this only works locally for now. I need to go to sleep, I'll deal with it later. 

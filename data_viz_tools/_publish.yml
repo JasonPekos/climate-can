@@ -1,0 +1,4 @@
+- source: Scratch.qmd
+  quarto-pub:
+    - id: 001627ea-3437-4b57-9473-14206a8b6699
+      url: 'https://jasonpekos.quarto.pub/climate-and-productivity-ebde'

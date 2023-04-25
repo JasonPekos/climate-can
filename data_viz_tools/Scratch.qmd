@@ -14,6 +14,7 @@ library(bayesplot)
 library(patchwork)
 library(viridis)
 
+knitr::opts_knit$set(root.dir = '../')
 ```
 
 
@@ -29,7 +30,7 @@ We have weather stations at the following points:
 map <- tar_read(plot_geoms) + 
   geom_point(data = tar_read(climate_dat), aes(x = Longitude..x., y = Latitude..y.))
 
-map
+# map
 ```
 
 # Finding the region names:

@@ -236,5 +236,5 @@ list(
       coord_map() +
       theme_void()
   }),
-  tar_quarto(report, "Scratch.qmd")
+  tar_quarto(report, "data_viz_tools/Scratch.Rmd")
 )
