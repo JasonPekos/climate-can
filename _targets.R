@@ -1,6 +1,6 @@
 # Load packages required to define the pipeline:
 library(targets)
-library(tarchetypes)
+library(tarchetypes) # Tar Quarto etc.
 
 
 # Set target options:
@@ -22,12 +22,16 @@ tar_option_set(
 tar_source()
 
 list(
-  tar_target(name = getdir,
-    command = print(getwd())
-  ),
+  #' ---
+  #' READ IN THE RAW DATA ----------------------------
+  #' ---
+
+  #' CLIMATE
   tar_target(name = raw_climate_data,
     command = read.csv("Data/climate_data/weather_Station_data.csv")
   ),
+
+  #' GEOMS: CENSUS AREA
   tar_target(name = raw_geom_data_on,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_ON_CSD_geometry_only.geojson", # nolint
@@ -100,64 +104,72 @@ list(
                     what = "sp")
     }
   ),
+  #' PRODUCTIVITY DATA
+  #' ---
+  #' put the productivity data here.
+  #' ---
+
+  #' ---
+  #' DATA PROCESSING ----------------------------
+  #' ---
   tar_target(name = on_fort,
     command = {
-      tidy(raw_geom_data_on, region = "Region.Name")
+      tidy_geom(raw_geom_data_on)
     }
   ),
   tar_target(name = mb_fort,
     command = {
-      tidy(raw_geom_data_mb)
+      tidy_geom(raw_geom_data_mb)
     }
   ),
   tar_target(name = sk_fort,
     command = {
-      tidy(raw_geom_data_sk)
+      tidy_geom(raw_geom_data_sk)
     }
   ),
   tar_target(name = ab_fort,
     command = {
-      tidy(raw_geom_data_ab)
+      tidy_geom(raw_geom_data_ab)
     }
   ),
   tar_target(name = qc_fort,
     command = {
-      tidy(raw_geom_data_qc)
+      tidy_geom(raw_geom_data_qc)
     }
   ),
   tar_target(name = bc_fort,
     command = {
-      tidy(raw_geom_data_bc)
+      tidy_geom(raw_geom_data_bc)
     }
   ),
   tar_target(name = nu_fort,
     command = {
-      tidy(raw_geom_data_nu)
+      tidy_geom(raw_geom_data_nu)
     }
   ),
   tar_target(name = nt_fort,
     command = {
-      tidy(raw_geom_data_nt)
+      tidy_geom(raw_geom_data_nt)
     }
   ),
   tar_target(name = yt_fort,
     command = {
-      tidy(raw_geom_data_yt)
+      tidy_geom(raw_geom_data_yt)
     }
   ),
   tar_target(name = nb_fort,
     command = {
-      tidy(raw_geom_data_nb)
+      tidy_geom(raw_geom_data_nb)
     }
   ),
   tar_target(name = nl_fort,
     command = {
-      tidy(raw_geom_data_nl)
+      tidy_geom(raw_geom_data_nl)
     }
   ),
   tar_target(name = pe_fort,
     command = {
-      tidy(raw_geom_data_pe)
+      tidy_geom(raw_geom_data_pe)
     }
   ),
   tar_target(name = climate_dat,
@@ -165,6 +177,10 @@ list(
       tidy_climate(raw_climate_data)
     }
   ),
+
+  #' ---
+  #' DATA VISUALIZATION ----------------------------
+  #' ---
   tar_target(name = plot_geoms,
   command = {
     theme_set("red")

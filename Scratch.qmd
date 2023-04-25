@@ -46,14 +46,14 @@ dat_trunc <- tar_read(climate_dat) %>%
   filter(Station.Name == "BROMPTONVILLE")
 
 p <- ggplot(data = dat_trunc, aes(x = Month,
-                                  y = Mean.Temp...C.,
+                                  y = Snow.Grnd.Last.Day..cm.,
                                   color = Year,
                                   group = Year)) +
   geom_point() +
   geom_line() + 
   theme_default() +
   scale_color_viridis(option = "inferno") + 
-  ggtitle("Change in Mean Temp Over Time — MAGOG")
+  ggtitle("Change in Mean Temp Over Time")
 
 
 p

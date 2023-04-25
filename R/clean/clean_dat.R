@@ -7,6 +7,7 @@ library(geojsonio)
 library(broom)
 library(sf)
 library(sp)
+library(purrr)
 sf_use_s2(FALSE)
 
 tidy_climate <- function(raw_climate_data){
@@ -77,10 +78,18 @@ add_enclosing_polydat <- function(tidyclimate, sp_object){
     #' The sp_object is a SpatialPolygonsDataFrame object.
 
     updated <- tidyclimate %>%
-        mutate(Region.Name = find_enclosing_polygon(Latitude..y., Longitude..x., sp_object)) #nolint
+        mutate(Region.Name = map2(Latitude..y., Longitude..x., #nolint
+                                  find_enclosing_polygon,
+                                  sp_object = sp_object) %>%
+                  purrr::map_chr(function(x) ifelse(length(x) == 0, NA, x)))
 
     return(updated)
 }
 
-add_enclosing_polydat(tar_read(raw_climate_data), tar_read(raw_geom_data_yt))
 
+
+test_set <- add_enclosing_polydat(test_set, tar_read(raw_geom_data_ab))
+
+
+p <-  geom_region_plot(test_set, tar_read(ab_fort), c("Medicine Hat (CY)", "Beaverlodge (T)"))
+p
