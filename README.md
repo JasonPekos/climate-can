@@ -21,6 +21,8 @@ The keynotes for running this package are:
 Added ObservableJS cells to the [scratch document](https://htmlpreview.github.io/?https://github.com/JasonPekos/climate-can/blob/main/Scratch.html).
 This allows you to upload a geojson file (you want the raw file for this), and then examine the census geography at a deeper level. 
 
+But this only works locally for now. I need to go to sleep, I'll deal with it later. 
+
 # What's next?
 
 1. Re-write most of the targets other than loading data.
