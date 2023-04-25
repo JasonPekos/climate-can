@@ -15,5 +15,13 @@ The keynotes for running this package are:
 3. When you want to create a single object, run `tar_make(object_name)`.
 4. To call a targets object, use `tar_read(object_name)`.
 5. To see the DAG, run `tar_visnetwork()`.
-6. To load the results of a target *into memory* , run `tar_load(object_name)`.
+6. To load the results of a target *into memory*, run `tar_load(object_name)`.
+
+
+# What's next?
+
+1. Re-write most of the targets other than loading data.
+2. Fix the `add_enclosing_polydat()` function so that only calculates the enclosing polygon for any given weather station *once*. 
+3. Create a little shiny app that allows me to find the station names by clicking on a map.
+
 
