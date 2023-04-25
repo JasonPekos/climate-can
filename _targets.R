@@ -236,32 +236,5 @@ list(
       coord_map() +
       theme_void()
   }),
-  tar_target(name = plot_geoms_multi,
-  command = {
-    fill = "#B97C7C"
-    color = "#7C0000"
-
-    p_bc <- plot_geom(bc_fort, color = color, fill = fill)
-    p_on <- plot_geom(on_fort, color = color, fill = fill)
-    p_ab <- plot_geom(ab_fort, color = color, fill = fill)
-    p_mb <- plot_geom(mb_fort, color = color, fill = fill)
-    p_nl <- plot_geom(nl_fort, color = color, fill = fill)
-    p_nb <- plot_geom(nb_fort, color = color, fill = fill)
-    p_nt <- plot_geom(nt_fort, color = color, fill = fill)
-    p_nu <- plot_geom(nu_fort, color = color, fill = fill)
-    p_pe <- plot_geom(pe_fort, color = color, fill = fill)
-    p_qc <- plot_geom(qc_fort, color = color, fill = fill)
-    p_sk <- plot_geom(sk_fort, color = color, fill = fill)
-    p_yt <- plot_geom(yt_fort, color = color, fill = fill)
-
-    (p_yt | p_nt | p_nu) / (p_bc | p_ab | p_sk ) / (p_mb | p_on | p_qc ) / ( p_nl | p_nb | p_pe) # nolint
-  }
-  ),
-  tar_target(name = plot_geoms_stations_on,
-  command = {
-    plot_geom(on_fort) + 
-      geom_point(data = climate_dat, aes(x = Longitude..x., y = Latitude..y.))
-  }
-  ),
   tar_quarto(report, "Scratch.qmd")
 )

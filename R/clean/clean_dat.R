@@ -85,11 +85,3 @@ add_enclosing_polydat <- function(tidyclimate, sp_object){
 
     return(updated)
 }
-
-
-
-test_set <- add_enclosing_polydat(test_set, tar_read(raw_geom_data_ab))
-
-
-p <-  geom_region_plot(test_set, tar_read(ab_fort), c("Medicine Hat (CY)", "Beaverlodge (T)"))
-p

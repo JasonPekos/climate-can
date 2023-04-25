@@ -32,6 +32,43 @@ map <- tar_read(plot_geoms) +
 map
 ```
 
+# Finding the region names:
+Upload a geojson file to find the region names. 
+
+::: {.callout-note collapse="true"}
+## Why do you need to upload the file?
+
+Unfortunatly, the datasets themselves aren't stored on github, 
+and so are not accesable unless you prebake them e.g. with a ggplot
+object. I can't easily do that with an `{ojs}` block, so you need
+to provide the `.geojson` file yourself!
+
+:::
+
+```{ojs}
+//| echo: false
+viewof jsonfile = Inputs.file({
+  accept: ".json,.geojson",
+  required: true
+})
+```
+
+```{ojs}
+//| echo: false
+f = jsonfile.json()
+```
+
+```{ojs}
+//| echo: false
+view(f)
+```
+
+```{ojs}
+//| echo: false
+view = require("geoverview@1.2.1").then((f) => f.view)
+```
+
+# Viewing Time Series Data:
 
 ```{r}
 #| code-fold: true
@@ -625,12 +662,3 @@ p
 ## Productivity Data
 
 
-
-# Add Geom to climate data:
-
-```{r}
-tar_load(climate_dat)
-tar_load(on_fort)
-
-
-```

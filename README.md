@@ -17,6 +17,9 @@ The keynotes for running this package are:
 5. To see the DAG, run `tar_visnetwork()`.
 6. To load the results of a target *into memory*, run `tar_load(object_name)`.
 
+# What's new?
+Added ObservableJS cells to the [scratch document](https://htmlpreview.github.io/?https://github.com/JasonPekos/climate-can/blob/main/Scratch.html).
+This allows you to upload a geojson file (you want the raw file for this), and then examine the census geography at a deeper level. 
 
 # What's next?
 
