@@ -25,7 +25,39 @@ list(
   #' ---
   #' READ IN THE RAW DATA ----------------------------
   #' ---
-
+  
+  #' PRODUCTIVITY
+  tar_target(name = raw_prod_data_ab,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inAlberta.csv")
+  ),
+  tar_target(name = raw_prod_data_bc,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inBritish Columbia.csv")
+  ),
+  tar_target(name = raw_prod_data_mb,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inManitoba.csv")
+  ),
+  tar_target(name = raw_prod_data_nb,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNew Brunswick.csv")
+  ),
+  tar_target(name = raw_prod_data_nl,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNewfoundland and Labrador.csv")
+  ),
+  tar_target(name = raw_prod_data_ns,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNova Scotia.csv")
+  ),
+  tar_target(name = raw_prod_data_on,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inOntario.csv")
+  ),
+  tar_target(name = raw_prod_data_pe,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inPrince Edward Island.csv")
+  ),
+  tar_target(name = raw_prod_data_ab,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inQuebec.csv")
+  ),
+  tar_target(name = raw_prod_data_sk,
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inSaskatchewan.csv")
+  ),
+  
   #' CLIMATE
   tar_target(name = raw_climate_data,
     command = read.csv("Data/climate_data/weather_Station_data.csv")
@@ -236,5 +268,5 @@ list(
       coord_map() +
       theme_void()
   }),
-  tar_quarto(report, "data_viz_tools/Scratch.Rmd")
+  tar_quarto(report, "data_viz_tools/Scratch.qmd")
 )
