@@ -130,6 +130,12 @@ list(
                     what = "sp")
     }
   ),
+  tar_target(name = raw_geom_data_ns,
+    command = {
+       geojson_read("Data/geojson_files/1.a_census_data_NS_CSD_geometry_only.geojson", # nolint
+                    what = "sp")
+    }
+  ),
   tar_target(name = raw_geom_data_pe,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_PE_CSD_geometry_only.geojson", # nolint
