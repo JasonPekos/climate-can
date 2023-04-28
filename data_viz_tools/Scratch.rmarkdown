@@ -1,0 +1,728 @@
+---
+title: "Climate and Productivity"
+format: html
+---
+
+```{r}
+#| warning: false
+#| echo: false
+library(targets)
+library(ggplot2)
+library(dplyr)
+library(bayesplot)
+library(patchwork)
+library(viridis)
+
+knitr::opts_knit$set(root.dir = '../')
+```
+
+
+
+[Website](https://ssc.ca/en/case-study/understanding-how-canadas-economy-might-be-impacted-climate-change)
+
+
+# What data do we have?
+
+We have weather stations at the following points:
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+map <- tar_read(plot_geoms) + 
+  geom_point(data = tar_read(climate_dat), aes(x = Longitude..x., y = Latitude..y.))
+
+map
+```
+
+
+# Finding the region names:
+Upload a geojson file to find the region names. 
+
+::: {.callout-note collapse="true"}
+## Why do you need to upload the file?
+
+Unfortunatly, the datasets themselves aren't stored on github, 
+and so are not accesable unless you prebake them e.g. with a ggplot
+object. I can't easily do that with an `{ojs}` block, so you need
+to provide the `.geojson` file yourself!
+
+:::
+
+
+```{ojs}
+//| echo: false
+viewof jsonfile = Inputs.file({
+  accept: ".json,.geojson",
+  required: true
+})
+```
+
+```{ojs}
+//| echo: false
+f = jsonfile.json()
+```
+
+```{ojs}
+//| echo: false
+view(f)
+```
+
+```{ojs}
+//| echo: false
+view = require("geoverview@1.2.1").then((f) => f.view)
+```
+
+
+# Viewing Time Series Data:
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+color_scheme_set(scheme = "teal")
+
+
+dat_trunc <- tar_read(climate_dat) %>%
+  # filter(Date.Time < "Jan 1999") %>%
+  filter(Station.Name == "BROMPTONVILLE")
+
+p <- ggplot(data = dat_trunc, aes(x = Month,
+                                  y = Snow.Grnd.Last.Day..cm.,
+                                  color = Year,
+                                  group = Year)) +
+  geom_point() +
+  geom_line() + 
+  theme_default() +
+  scale_color_viridis(option = "inferno") + 
+  ggtitle("Change in Mean Temp Over Time")
+
+
+p
+```
+
+
+## Climate Data
+
+We have the following parameters in the climate dataset:
+
+::: {.panel-tabset}
+## Longitude..x., Latitude..y.
+
+Just lat, lon. 
+
+## Station.Name
+
+Gives name of weather station. See also: Date.Time.
+
+## Climate.ID
+
+I don't know what this is yet. Someone should find out 
+
+- Jason
+
+## Date.Time (Year, Month)
+
+Not all the stations have coverage throughout the entire range. 
+
+
+```{r}
+#| echo: false
+#| warning: false
+dat_a <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "A")
+dat_b <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "B")
+dat_c <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "C")
+dat_d <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "D")
+dat_e <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "E")
+dat_f <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "F")
+dat_g <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "G")
+dat_h <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "H")
+dat_i <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "I")
+dat_j <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "J")
+dat_k <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "K")
+dat_l <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "L")
+dat_m <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "M")
+dat_n <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "N")
+dat_o <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "O")
+dat_p <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "P")
+dat_q <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "Q")
+dat_r <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "R")
+dat_s <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "S")
+dat_t <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "T")
+dat_u <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "U")
+dat_v <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "V")
+dat_w <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "W")
+dat_x <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "X")
+dat_y <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "Y")
+dat_z <- tar_read(climate_dat) %>% filter(substr(Station.Name, 1, 1) == "Z")
+```
+
+
+::: {.panel-tabset}
+
+## A
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+ggplot(dat_a, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `A` Names") +
+  theme_default()
+
+```
+
+
+## B
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+d1 <- filter(dat_b, substr(Station.Name, 2, 2) < "N")
+d2 <- filter(dat_b, substr(Station.Name, 2, 2) >= "N")
+
+p1 <- ggplot(d1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `B` Names") +
+  theme_default()
+
+p2 <- ggplot(d2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `B` Names") +
+  theme_default()
+
+p1
+
+p2
+
+```
+
+
+## C
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+c1 <- filter(dat_c, substr(Station.Name, 2, 2) < "N")
+c2 <- filter(dat_c, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(c1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `C` Names") +
+  theme_default()
+
+ggplot(c2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `C` Names") +
+  theme_default()
+
+```
+
+
+
+
+## D
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+d1 <- filter(dat_d, substr(Station.Name, 2, 2) < "N")
+d2 <- filter(dat_d, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(d1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `D` Names") +
+  theme_default()
+
+ggplot(d2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `D` Names") +
+  theme_default()
+```
+
+
+## E
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+e1 <- filter(dat_e, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(e1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `E` Names") +
+  theme_default()
+
+```
+
+
+
+
+## F
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+f1 <- filter(dat_f, substr(Station.Name, 2, 2) < "N")
+f2 <- filter(dat_f, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(f1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `F` Names") +
+  theme_default()
+
+ggplot(f2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `F` Names") +
+  theme_default()
+```
+
+
+## G
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+g1 <- filter(dat_g, substr(Station.Name, 2, 2) < "N")
+g2 <- filter(dat_g, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(g1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `G` Names") +
+  theme_default()
+
+ggplot(g2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `G` Names") +
+  theme_default()
+```
+
+
+## H
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+h1 <- filter(dat_h, substr(Station.Name, 2, 2) < "N")
+h2 <- filter(dat_h, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(h1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `H` Names") +
+  theme_default()
+
+ggplot(h2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `H` Names") +
+  theme_default()
+```
+
+
+## I
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+i1 <- filter(dat_i, substr(Station.Name, 2, 2) <= "N")
+
+ggplot(i1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `I` Names") +
+  theme_default()
+
+```
+
+
+## J
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+j1 <- filter(dat_j, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(j1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `J` Names") +
+  theme_default()
+
+```
+
+
+## K
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+k1 <- filter(dat_k, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(k1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `K` Names") +
+  theme_default()
+
+```
+
+
+## L
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+l1 <- filter(dat_l, substr(Station.Name, 2, 2) < "N")
+l2 <- filter(dat_l, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(l1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `L` Names") +
+  theme_default()
+
+ggplot(l2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `L` Names") +
+  theme_default()
+```
+
+
+## M
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+m1 <- filter(dat_m, substr(Station.Name, 2, 2) < "N")
+m2 <- filter(dat_m, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(m1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `M` Names") +
+  theme_default()
+
+ggplot(m2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `M` Names") +
+  theme_default()
+```
+
+
+## N
+
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+n1 <- filter(dat_n, substr(Station.Name, 2, 2) < "N")
+n2 <- filter(dat_n, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(n1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `N` Names") +
+  theme_default()
+
+ggplot(n2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `N` Names") +
+  theme_default()
+```
+
+
+
+## O
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+o1 <- filter(dat_o, substr(Station.Name, 2, 2) < "N")
+o2 <- filter(dat_o, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(o1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `O` Names") +
+  theme_default()
+
+ggplot(o2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `O` Names") +
+  theme_default()
+```
+
+
+## P
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+p1 <- filter(dat_p, substr(Station.Name, 2, 2) < "N")
+p2 <- filter(dat_p, substr(Station.Name, 2, 2) >= "N")
+
+ggplot(p1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `P` Names") +
+  theme_default()
+
+ggplot(p2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `P` Names") +
+  theme_default()
+```
+
+
+## Q
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+q1 <- filter(dat_q, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(q1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `O` Names") +
+  theme_default()
+```
+
+
+## R
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+r1 <- filter(dat_r, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(r1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `R` Names") +
+  theme_default()
+```
+
+
+## S
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+s1 <- filter(dat_s, substr(Station.Name, 2, 2) <= "P")
+s2 <- filter(dat_s, (substr(Station.Name, 2, 2) > "P") & (substr(Station.Name, 2, 2) <= "T"))
+s3 <- filter(dat_s, substr(Station.Name, 2, 2) > "T")
+
+
+ggplot(s1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `S` Names") +
+  theme_default()
+
+ggplot(s2, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `S` Names") +
+  theme_default()
+
+ggplot(s3, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `S` Names") +
+  theme_default()
+```
+
+
+## T
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+t1 <- filter(dat_t, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(t1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `T` Names") +
+  theme_default()
+```
+
+
+
+## U
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+u1 <- filter(dat_u, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(u1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `U` Names") +
+  theme_default()
+```
+
+
+## V
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+v1 <- filter(dat_v, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(v1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `V` Names") +
+  theme_default()
+```
+
+
+## W
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+w1 <- filter(dat_w, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(w1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `W` Names") +
+  theme_default()
+```
+
+
+## X
+
+Note: No X names.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+x1 <- filter(dat_x, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(x1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `X` Names") +
+  theme_default()
+```
+
+
+## Y
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+y1 <- filter(dat_y, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(y1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `Y` Names") +
+  theme_default()
+```
+
+
+## Z
+
+Note: there are no Z names.
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+z1 <- filter(dat_z, substr(Station.Name, 2, 2) <= "Z")
+
+ggplot(z1, aes(x = Date.Time, y = Station.Name)) + 
+  geom_line() +
+  ggtitle("Coverage — `Z` Names") +
+  theme_default()
+```
+
+
+
+:::
+
+
+## Mean.Max.Temp...C.
+
+Also don't know what this is yet, but I can guess...
+
+
+```{r}
+#| code-fold: true
+#| code-summary: "Show the code"
+#| warning: false
+
+dat_trunc <- tar_read(climate_dat) %>%
+  # filter(Date.Time < "Jan 1999") %>%
+  filter(Station.Name == "MAGOG")
+
+p <- ggplot(data = dat_trunc, aes(x = Month,
+                                  y = Mean.Max.Temp...C.,
+                                  color = Year,
+                                  group = Year)) +
+  geom_point() +
+  geom_line() + 
+  theme_default() +
+  scale_color_viridis(option = "inferno") + 
+  ggtitle("Change in Mean Max Temp Over Time — MAGOG")
+
+
+p
+```
+
+
+## Mean.Max.Temp.Flag
+
+
+:::
+
+## Productivity Data
+
+
+
