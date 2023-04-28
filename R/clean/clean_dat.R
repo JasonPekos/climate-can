@@ -57,7 +57,7 @@ find_enclosing_polygon <- function(lat, long, sp_object) {
   sfpoly <- st_make_valid(st_as_sf(sp_object))
 
   # Create a point and set CRS to match sfpoly
-  point <- st_point(c(long, lat)) %>%
+  point <- st_point(c(lat, long)) %>%
     st_sfc(crs = st_crs(sfpoly))
 
   intersecting_indices <- st_intersects(sfpoly, point)
