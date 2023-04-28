@@ -12,13 +12,13 @@ sf_use_s2(FALSE)
 
 tidy_climate <- function(raw_climate_data){
     #' JCP: Tidy the climate data
-    raw_climate_data %>%
+    out <- raw_climate_data %>%
         mutate(Date.Time = as.yearmon(Date.Time, format = "%Y-%m")) %>% #nolint
         mutate(year = year(Date.Time)) %>%
         mutate(Province = NA) %>% # Add these for later use
         mutate(Region.Name = NA)
 
-    return(raw_climate_data)
+    return(out)
 }
 
 tidy_geom <- function(geojson_file){
@@ -47,7 +47,7 @@ tidy_geom <- function(geojson_file){
 
 find_enclosing_polygon <- function(lat, long, sp_object) {
     #' JCP: Find the name of the region that contains a given point.
-    #' Takes a latitude, longitude, and a SpatialPolygonsDataFrame object 
+    #' Takes a latitude, longitude, and a SpatialPolygonsDataFrame object
     #' as input. Returns the name of the region that contains the point.
     #' ---
     #' This function is computationally expensive, because intersection
