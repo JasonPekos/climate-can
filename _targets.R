@@ -23,6 +23,17 @@ tar_source()
 
 list(
   #' ---
+  #'Downloads ----------------------------
+  #' ---
+  tar_download(
+    name = download_cmip5,
+    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP2.6/monthly_ens/absolute/CMIP5_rcp2.6_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc", # nolint
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"), # nolint
+    paths = c("Data/CMIP5/future.ncdf",
+              "Data/CMIP5/hist.ncdf"),
+    method = "auto"
+  ),
+  #' ---
   #' READ IN THE RAW DATA ----------------------------
   #' ---
   
@@ -58,8 +69,8 @@ list(
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inSaskatchewan.csv")
   ),
   
-  #' CLIMATE
-  tar_target(name = raw_climate_data,
+  #' CLIMATE — WEATHER STATION DATA
+  tar_target(name = raw_station_data,
     command = read.csv("Data/climate_data/weather_Station_data.csv")
   ),
 
@@ -210,69 +221,9 @@ list(
       tidy_geom(raw_geom_data_pe)
     }
   ),
-  tar_target(name = climate_dat,
+  tar_target(name = tidy_weather_station_data,
     command = {
-      tidy_climate(raw_climate_data)
+      tidy_climate(raw_station_data)
     }
-  ),
-
-  #' ---
-  #' DATA VISUALIZATION ----------------------------
-  #' ---
-  tar_target(name = plot_geoms,
-  command = {
-    theme_set("red")
-    ggplot() +
-      geom_polygon(data = on_fort,
-                   aes(x = long, y = lat, group = group),
-                   fill = "#69b3a2",
-                   color = "white") +
-      geom_polygon(data = mb_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = sk_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = ab_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = qc_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = bc_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = nu_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = nt_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = yt_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = nb_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = nl_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      geom_polygon(data = pe_fort,
-                    aes(x = long, y = lat, group = group),
-                    fill = "#69b3a2",
-                    color = "white") +
-      coord_map() +
-      theme_void()
-  }),
-  tar_quarto(report, "data_viz_tools/Scratch.qmd")
+  )
 )
