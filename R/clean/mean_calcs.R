@@ -1,11 +1,6 @@
 library(terra)
 library(tidyterra)
 library(sf)
-library(targets)
-library(ggplot2)
-
-tas_future <- rast("future.ncdf")
-tas_hist <- rast("hist.ncdf")
 
 getmean_raster <- function(raster, time) {
   # Extract the raster layer at the specified time
@@ -74,11 +69,6 @@ s_w_mean_hist <- useful_subset %>%
       geouid = GeoUID,
       time = Date
     )
-  ) 
+  )
 
-s_w_mean_hist %>%
-  filter(GeoUID == 3560085)
-
-
-
-
+ggplot(data = s_w_mean_hist, aes(x = Date, y = mean))

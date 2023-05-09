@@ -36,7 +36,17 @@ list(
   #' ---
   #' READ IN THE RAW DATA ----------------------------
   #' ---
+   
   
+  #' CMPI5 
+
+  tar_target(name = raw_cmip5_future,
+             command = rast("Data/CMIP5/future.ncdf")
+  ),
+  tar_target(name = raw_cmip5_hist,
+             command = rast("Data/CMIP5/hist.ncdf")
+  ),
+
   #' PRODUCTIVITY
   tar_target(name = raw_prod_data_ab,
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inAlberta.csv")
