@@ -26,19 +26,27 @@ list(
   #'Downloads ----------------------------
   #' ---
   tar_download(
-    name = download_cmip5,
+    name = download_cmip5_temp,
     urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP2.6/monthly_ens/absolute/CMIP5_rcp2.6_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc", # nolint
-             "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"), # nolint
-    paths = c("Data/CMIP5/future.ncdf",
-              "Data/CMIP5/hist.ncdf"),
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP4.5/monthly_ens/absolute/CMIP5_rcp4.5_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc",
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP8.5/monthly_ens/absolute/CMIP5_rcp8.5_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"
+             ), # nolint
+    paths = c("Data/CMIP5/futuretemplow.ncdf",
+              "Data/CMIP5/futuretempmed.ncdf",
+              "Data/CMIP5/futuretemphigh.ncdf"),
+    method = "auto"
+  ),
+  tar_download(
+    name = download_hist,
+    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"), # nolint
+    paths = c("Data/CMIP5/hist.ncdf"),
     method = "auto"
   ),
   #' ---
   #' READ IN THE RAW DATA ----------------------------
   #' ---
    
-  
-  #' CMPI5 
+  #' CMPI5
 
   tar_target(name = raw_cmip5_future,
              command = rast("Data/CMIP5/future.ncdf")
