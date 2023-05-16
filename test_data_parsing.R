@@ -38,18 +38,18 @@ on <- tar_read(raw_geom_data_on) %>%
   st_as_sf() %>%
   st_transform(crs = crs(tas_hist))
 
-kenora <- on %>% filter(Region.Name == "Kenora, Unorganized (NO)")
+brantford <- on %>% filter(Region.Name == "Brantford (CY)")
 
 # Crop tas_future around dundas
-tk <- crop(tas_future, kenora)
-tas_future_kenora <- mask(tk, kenora)
+tk <- crop(tas_future, brantford)
+tas_future_brantford <- mask(tk, brantford)
 
-tas_future_kenora
+
 
 
 # Plot
-ggplot(kenora) +
-  geom_spatraster(data = tas_future_kenora[[20]]) +
+ggplot(brantford) +
+  geom_spatraster(data = tas_future_brantford[[20]]) +
   scale_fill_whitebox_c(
     palette = "muted",
     labels = scales::label_number(suffix = "º")

@@ -47,12 +47,25 @@ list(
   #' ---
    
   #' CMPI5
-
-  tar_target(name = raw_cmip5_future,
-             command = rast("Data/CMIP5/future.ncdf")
-  ),
   tar_target(name = raw_cmip5_hist,
-             command = rast("Data/CMIP5/hist.ncdf")
+             command = rast("Data/CMIP5/hist.ncdf") |>
+               modify_time_labels() |>
+               terra::wrap()
+  ),
+  tar_target(name = raw_cmip5_future_low,
+             command = rast("Data/CMIP5/futuretemplow.ncdf") |> 
+               modify_time_labels() |>
+               terra::wrap()
+  ),
+  tar_target(name = raw_cmip5_future_med,
+             command = rast("Data/CMIP5/futuretempmed.ncdf") |>
+               modify_time_labels() |>
+               terra::wrap()
+  ),
+  tar_target(name = raw_cmip5_future_high,
+             command = rast("Data/CMIP5/futuretemphigh.ncdf") |>
+               modify_time_labels() |>
+               terra::wrap()
   ),
 
   #' PRODUCTIVITY

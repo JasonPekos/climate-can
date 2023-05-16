@@ -40,3 +40,5 @@ ggplot() +
     palette = "muted",
     labels = scales::label_number(suffix = "º")
   )
+
+
