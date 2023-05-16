@@ -17,8 +17,6 @@ getmean_geouid <- function(country_raster, census_geoms, geouid, time){
 
     # Filter the census geoms to the specified geouid
     census_region <- census_geoms %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(country_raster)) %>%
         filter(GeoUID == geouid)
 
     # Crop and mask the raster to the census region

@@ -115,79 +115,105 @@ list(
   tar_target(name = raw_geom_data_on,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_ON_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_mb,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_MB_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_sk,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_SK_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_ab,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_AB_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_qc,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_QC_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_bc,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_BC_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_nu,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_NU_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_nt,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_NT_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_yt,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_YT_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_nb,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_NB_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_nl,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_NL_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_ns,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_NS_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   tar_target(name = raw_geom_data_pe,
     command = {
        geojson_read("Data/geojson_files/1.a_census_data_PE_CSD_geometry_only.geojson", # nolint
-                    what = "sp")
+                    what = "sp") %>%
+        st_as_sf() %>%
+        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
     }
   ),
   #' PRODUCTIVITY DATA
@@ -211,70 +237,27 @@ list(
         )
     }
   ),
+  tar_target(name = nl_ts_test,
+             command = {
+               raw_prod_data_nl %>%
+                 filter(Date < "2000") %>%
+                 mutate(
+                   mean_temp = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_med),
+                       census_geoms = raw_geom_data_nl
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 )
+             }
+  ),
 
   #' ---
   #' DATA PROCESSING ----------------------------
   #' ---
-  tar_target(name = on_fort,
-    command = {
-      tidy_geom(raw_geom_data_on)
-    }
-  ),
-  tar_target(name = mb_fort,
-    command = {
-      tidy_geom(raw_geom_data_mb)
-    }
-  ),
-  tar_target(name = sk_fort,
-    command = {
-      tidy_geom(raw_geom_data_sk)
-    }
-  ),
-  tar_target(name = ab_fort,
-    command = {
-      tidy_geom(raw_geom_data_ab)
-    }
-  ),
-  tar_target(name = qc_fort,
-    command = {
-      tidy_geom(raw_geom_data_qc)
-    }
-  ),
-  tar_target(name = bc_fort,
-    command = {
-      tidy_geom(raw_geom_data_bc)
-    }
-  ),
-  tar_target(name = nu_fort,
-    command = {
-      tidy_geom(raw_geom_data_nu)
-    }
-  ),
-  tar_target(name = nt_fort,
-    command = {
-      tidy_geom(raw_geom_data_nt)
-    }
-  ),
-  tar_target(name = yt_fort,
-    command = {
-      tidy_geom(raw_geom_data_yt)
-    }
-  ),
-  tar_target(name = nb_fort,
-    command = {
-      tidy_geom(raw_geom_data_nb)
-    }
-  ),
-  tar_target(name = nl_fort,
-    command = {
-      tidy_geom(raw_geom_data_nl)
-    }
-  ),
-  tar_target(name = pe_fort,
-    command = {
-      tidy_geom(raw_geom_data_pe)
-    }
-  ),
   tar_target(name = tidy_weather_station_data,
     command = {
       tidy_climate(raw_station_data)
