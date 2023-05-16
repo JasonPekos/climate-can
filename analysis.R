@@ -1,30 +1,27 @@
 library(targets)
 library(parallel)
 
-t_low <- unwrap(tar_read(raw_cmip5_future_low))
-t_med <- unwrap(tar_read(raw_cmip5_future_med))
-t_high <- unwrap(tar_read(raw_cmip5_future_high))
-
-num_cores <- detectCores() - 1
-
-prod_on <- tar_read(raw_prod_data_on)
-cmip5_med <- unwrap(tar_read(cmip5_med))
-census_on <- tar_read(raw_geom_data_on)
-prod_on <-prod_on %>%
-  filter(GeoUID == "3560004") %>%
-  filter(Date < "2002")
 
 
-prod_on_new_2 <- prod_on %>%
-  mutate(
-    mean = mapply(
-      getmean_geouid,
-      MoreArgs = list(
-        country_raster = cmip5_med,
-        census_geoms = census_on
-      ),
-      geouid = GeoUID,
-      time = Date
-    )
-  )
+prod <- tar_read(pe_ts_test)
+census <- st_as_sf(tar_read(raw_geom_data_pe))
+
+
+time_of_interest <- as.Date("1999-01-01")  # replace with your desired date
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID),  # Convert GeoUID to character
+         mean_temp = map_dbl(mean_temp, ~ .x[[1]]))
+
+
+# Join the spatial data with the temperature data
+census_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+# Plot
+ggplot() +
+  geom_sf(data = census_sf, aes(fill = mean_temp)) +
+  scale_fill_gradient(low = "blue", high = "red") +
+  theme_minimal() +
+  labs(fill = "Mean Temp", title = paste("Mean temperatures at", time_of_interest))
 

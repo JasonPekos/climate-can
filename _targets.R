@@ -19,6 +19,9 @@ tar_option_set(
   format = "rds" # default storage format
 )
 
+options(clustermq.scheduler = "slurm")
+options(clustermq.template = "clustermq.tmpl")
+
 tar_source()
 
 list(
@@ -194,7 +197,7 @@ list(
   tar_target(name = pe_ts_test,
     command = {
       raw_prod_data_pe %>%
-        filter(Date < "2002") %>%
+        filter(Date < "2000") %>%
         mutate(
           mean_temp = mapply(
             getmean_geouid,

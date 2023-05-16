@@ -26,7 +26,7 @@ getmean_geouid <- function(country_raster, census_geoms, geouid, time){
         mask(census_region)
 
     # Extract the raster layer at the specified time
-    layer <- country_raster[[time(country_raster) == time]]
+    layer <- raster[[time(country_raster) == time]]
 
     # Calculate the average value of all cells in the layer
     avg <- global(layer, fun = mean, na.rm = TRUE)
