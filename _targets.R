@@ -48,23 +48,26 @@ list(
    
   #' CMPI5
   tar_target(name = raw_cmip5_hist,
-             command = rast("Data/CMIP5/hist.ncdf") |>
-               modify_time_labels() |>
+             command = rast("Data/CMIP5/hist.ncdf") %>%
+               modify_time_labels() %>%
                terra::wrap()
   ),
-  tar_target(name = raw_cmip5_future_low,
-             command = rast("Data/CMIP5/futuretemplow.ncdf") |> 
-               modify_time_labels() |>
+  tar_target(name = cmip5_low,
+             command = rast("Data/CMIP5/futuretemplow.ncdf") %>% 
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist)) %>%
                terra::wrap()
   ),
-  tar_target(name = raw_cmip5_future_med,
-             command = rast("Data/CMIP5/futuretempmed.ncdf") |>
-               modify_time_labels() |>
+  tar_target(name = cmip5_med,
+             command = rast("Data/CMIP5/futuretempmed.ncdf") %>%
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist)) %>%
                terra::wrap()
   ),
-  tar_target(name = raw_cmip5_future_high,
-             command = rast("Data/CMIP5/futuretemphigh.ncdf") |>
-               modify_time_labels() |>
+  tar_target(name = cmip5_high,
+             command = rast("Data/CMIP5/futuretemphigh.ncdf") %>%
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist)) %>%
                terra::wrap()
   ),
 
@@ -188,6 +191,22 @@ list(
   #' ---
   #' put the productivity data here.
   #' ---
+  tar_target(name = on_ts_test,
+    command = {
+      raw_prod_data_on %>%
+        mutate(
+          mean_temp = mapply(
+            getmean_geouid,
+            MoreArgs = list(
+              country_raster = cmip5_med,
+              census_geoms = raw_geom_data_on
+            ),
+            geouid = GeoUID,
+            time = Date
+          )
+        )
+    }
+  ),
 
   #' ---
   #' DATA PROCESSING ----------------------------
