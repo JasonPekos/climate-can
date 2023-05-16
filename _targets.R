@@ -254,6 +254,23 @@ list(
                  )
              }
   ),
+  tar_target(name = on_ts_test,
+             command = {
+               raw_prod_data_on %>%
+                 filter(Date < "2000") %>%
+                 mutate(
+                   mean_temp = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_med),
+                       census_geoms = raw_geom_data_on
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 )
+             }
+  ),
 
   #' ---
   #' DATA PROCESSING ----------------------------

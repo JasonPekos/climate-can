@@ -1,13 +1,16 @@
 library(targets)
 library(parallel)
+library(profvis)
 
 
 
-prod <- tar_read(pe_ts_test)
-census <- st_as_sf(tar_read(raw_geom_data_pe))
 
-
+prod <- tar_read(nl_ts_test)
+census <- st_as_sf(tar_read(raw_geom_data_nl))
 time_of_interest <- as.Date("1999-01-01")  # replace with your desired date
+rastc <- unwrap(tar_read(cmip5_low))
+
+
 
 prod_subset <- prod %>%
   filter(Date == time_of_interest) %>%
