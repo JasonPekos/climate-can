@@ -27,4 +27,14 @@ The variable information for climate data are available [here](https://climate.w
 
 1. Fix the `add_enclosing_polydat()` function so that only calculates the enclosing polygon for any given weather station *once*.
 
+# Shell Script to Convert .tif to NetCDF:
+
+```
+#!/bin/bash
+for tif in *.tif; do
+  nc="${tif%.tif}.nc"
+  gdal_translate -of NetCDF "$tif" "$nc"
+done
+```
+
 
