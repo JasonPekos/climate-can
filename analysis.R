@@ -5,10 +5,20 @@ library(profvis)
 
 
 
-prod <- tar_read(nl_ts_test)
-census <- st_as_sf(tar_read(raw_geom_data_nl))
+prod <- tar_read(on_ts_test)
+census <- tar_read(raw_geom_data_on)
 time_of_interest <- as.Date("1999-01-01")  # replace with your desired date
 rastc <- unwrap(tar_read(cmip5_low))
+essex <- 3537016
+
+getmean_geouid(rastc, census, essex, time_of_interest) # This breaks
+
+essex_region <- census %>%
+  filter(GeoUID == essex)
+
+
+
+rastcen <- crop(rastc, essex_region) 
 
 
 
