@@ -191,15 +191,16 @@ list(
   #' ---
   #' put the productivity data here.
   #' ---
-  tar_target(name = on_ts_test,
+  tar_target(name = pe_ts_test,
     command = {
-      raw_prod_data_on %>%
+      raw_prod_data_pe %>%
+        filter(Date < "2002") %>%
         mutate(
           mean_temp = mapply(
             getmean_geouid,
             MoreArgs = list(
-              country_raster = cmip5_med,
-              census_geoms = raw_geom_data_on
+              country_raster = unwrap(cmip5_med),
+              census_geoms = raw_geom_data_pe
             ),
             geouid = GeoUID,
             time = Date
