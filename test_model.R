@@ -4,17 +4,21 @@ library(spdep)
 library(sf)
 library(tidyverse)
 library(lubridate)
+library(INLAspacetime)
 
-# make the variables in appropriate form
+# make the variables in the data in appropriate form
 p_pe <- tar_read(pe_ts_test)
 p_pe$mean_temp <- as.numeric(p_pe$mean_temp)
 p_pe$Date <- as.Date(p_pe$Date)
+
+ns = length(unique(p_pe$GeoUID)) #No of regions
+nt = length(unique(p_pe$Date)) #No of time points
+  
 p_pe <- p_pe %>% 
   mutate(month = month(Date)) %>%
   mutate(year = year(Date)) %>%
-  mutate(t = rep(seq(1:36), 112)) %>%
-  mutate(s = rep(seq(1,112), each = 36))
-  
+  mutate(t = rep(seq(1:nt), ns)) %>%
+  mutate(s = rep(seq(1,ns), each = nt))
 
 #' Constructing Neigbourhood matrix for PEI
 #' 1. Load Polygons Data Frame (type "sf")
@@ -34,7 +38,7 @@ sf_use_s2(FALSE)
 #CreatNeigbhour's list
 wr_pe <- poly2nb(raw_geom_data_pe, row.names=seq(1:length(raw_geom_data_pe$GeoUID)), queen=FALSE) 
 wr_pe
-
+w.list <- nb2listw(wr_pe, style = "B")
 
 #Neighbours matrix
 w_pe <- nb2mat(wr_pe, style='B', zero.policy = TRUE) 
@@ -46,10 +50,12 @@ plot(raw_geom_data_pe, col='gray', border='blue')
 xy <- coordinates(raw_geom_data_pe)
 plot(wr_pe, xy, col='red', lwd=2, add=TRUE)
 
+
 #' Modelling productivity (Y) in PEI (by each industry)
 #' Base model: Bayesian GLM with Normal distribution for Y_{it}
 #' Climate variables: use fixed effects
 #' For spatial (S) and temporal (T) -> use random effects 
+#' Model 0: GLM without any random effects of S and T
 #' Model 1: `Linear` trend and NCAR for intercept and slope
 #' Model 2: `Anova` with NCAR for both S and T and Normal for interaction
 #' Model 3: `Temporal AR-1`
@@ -69,6 +75,7 @@ thin <- 10
 #' 2. Take those industries that are dominant over the most regions
 
 table(p_pe$Dominant_NAICS)
+names(sort(table(p_pe$Dominant_NAICS), decreasing = T)[1:2])
 # 1 -> Finance; 2 -> Agriculture
 
 vs = sample(nrow(p_pe), 0.1*nrow(p_pe)) # set the rows to use model validation
@@ -79,8 +86,27 @@ vs = sample(nrow(p_pe), 0.1*nrow(p_pe)) # set the rows to use model validation
 
 f.pe.11 <-  production_in_division_X11.Agriculture.forestry.fishing.hunting.21.Mining.quarrying.and.oil.and.gas.extraction ~  mean_temp
 
+
+#' Model 0
+M0.pe.11 <- glm(formula = f.pe.11, family = "gaussian", data = p_pe)
+resid.M0.pe.11 <- residuals(M0.pe.11)
+summary(M0.pe.11)$coefficients
+summary(M0.pe.11)$dispersion
+
+#' Checking for spatial dependence
+#' Using Moran's I statistic
+moran.mc(x = resid.M0.pe.11[1:112], listw = w.list, nsim = 10000)
+
+# Plot of Moran's statistic
+#rwm <- mat2listw(w_pe, style='W')
+# Checking if rows add up to 1
+#mat <- listw2mat(rwm)
+#apply(mat, 1, sum)[1:112]
+#moran.plot(y, rwm)
+
+
 ## Model 1
-M.lin.pe.11 <- Bcartime(formula=f.pe.11, data=p_pe, scol= "GeoUID", tcol= c("year"), 
+M.lin.pe.11 <- Bcartime(formula=f.pe.11, data=p_pe, scol= "GeoUID", tcol= "Date", 
                  W=w_pe, model="linear", family="gaussian", package="CARBayesST",
                  validrows = vs,
                  N=Ncar, burn.in=burn.in.car, thin=thin)
@@ -179,9 +205,9 @@ summary(M.ar2.pe.11)
 ## Finance.and.insurance.53.Real.estate.and.rental.and.leasing
 ####
 
-f_pe_53 <- production_in_division_X52.Finance.and.insurance.53.Real.estate.and.rental.and.leasing ~ mean_temp
+f_pe_52 <- production_in_division_X52.Finance.and.insurance.53.Real.estate.and.rental.and.leasing ~ mean_temp
 
-M_pe_11 <- Bcartime(formula=f_pe_53, data=p_pe, scol= "GeoUID", tcol="Date", 
+M_pe_52 <- Bcartime(formula=f_pe_52, data=p_pe, scol= "GeoUID", tcol="Date", 
                     W=w_pe, model="ar", family="gaussian", package="CARBayesST",
                     validrows = vs,
                     N=Ncar, burn.in=burn.in.car, thin=thin)
