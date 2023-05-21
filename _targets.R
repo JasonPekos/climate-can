@@ -21,6 +21,10 @@ tar_option_set(
 
 options(clustermq.scheduler = "multicore")
 
+# options(
+#   clustermq.scheduler = "ssh",
+#   clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this 
+# )
 
 tar_source()
 
