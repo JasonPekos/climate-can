@@ -164,7 +164,7 @@ list(
   tar_target(name = raw_prod_data_pe,
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inPrince Edward Island.csv") %>% 
                mutate(Date = as.Date(Date)) %>%
-               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2030-01-01"), by = "month"))
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_qc,
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inQuebec.csv")
@@ -336,6 +336,106 @@ list(
           )
         )
     }
+  ),
+  tar_target(name = on_ts,
+             command = {
+               raw_prod_data_on %>%
+                 filter(Date < "2001-01-01") %>%
+                 mutate(
+                   mean_temp_high = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_high_temp),
+                       census_geoms = raw_geom_data_on
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_temp_low = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_low_temp),
+                       census_geoms = raw_geom_data_on
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_pcp_low = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_low_pcp),
+                       census_geoms = raw_geom_data_on
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_pcp_high = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_high_pcp),
+                       census_geoms = raw_geom_data_on
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 )
+             }
+  ),
+  tar_target(name = ab_ts,
+             command = {
+               raw_prod_data_ab %>%
+                 filter(Date < "2001-01-01") %>%
+                 mutate(
+                   mean_temp_high = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_high_temp),
+                       census_geoms = raw_geom_data_ab
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_temp_low = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_low_temp),
+                       census_geoms = raw_geom_data_ab
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_pcp_low = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_low_pcp),
+                       census_geoms = raw_geom_data_ab
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 ) %>%
+                 mutate(
+                   mean_pcp_high = mapply(
+                     getmean_geouid,
+                     MoreArgs = list(
+                       country_raster = unwrap(cmip5_high_pcp),
+                       census_geoms = raw_geom_data_ab
+                     ),
+                     geouid = GeoUID,
+                     time = Date
+                   )
+                 )
+             }
   ),
 
 
