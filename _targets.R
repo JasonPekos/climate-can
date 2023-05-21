@@ -162,7 +162,9 @@ list(
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inOntario.csv")
   ),
   tar_target(name = raw_prod_data_pe,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inPrince Edward Island.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inPrince Edward Island.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2030-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_qc,
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inQuebec.csv")
@@ -288,7 +290,7 @@ list(
   tar_target(name = pe_ts,
     command = {
       raw_prod_data_pe %>%
-        filter(Date < "2001") %>%
+        filter(Date < "2001-01-01") %>%
         mutate(
           mean_temp_high = mapply(
             getmean_geouid,
