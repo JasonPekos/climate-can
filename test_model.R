@@ -2,7 +2,9 @@ library(bmstdr)
 library(raster)
 library(spdep)
 library(sf)
-library(tidyverse)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
 library(lubridate)
 library(INLAspacetime)
 
@@ -19,6 +21,13 @@ p_pe <- p_pe %>%
   mutate(year = year(Date)) %>%
   mutate(t = rep(seq(1:nt), ns)) %>%
   mutate(s = rep(seq(1,ns), each = nt))
+
+#overall productiivity
+ovl_prod <- p_pe %>%
+  select(starts_with("production")) %>%
+  apply(1, mean)
+
+p_pe = cbind(p_pe, ovl_prod)
 
 #' Constructing Neigbourhood matrix for PEI
 #' 1. Load Polygons Data Frame (type "sf")
@@ -65,8 +74,8 @@ plot(wr_pe, xy, col='red', lwd=2, add=TRUE)
 
 
 #' Set MCMC run parameters
-#' Below specification produces 10,000 samples from posterior distribution
-Ncar <- 50000
+#' Below specification produces 3,000 samples from posterior distribution
+Ncar <- 40000
 burn.in.car <- 10000
 thin <- 10
 
@@ -201,13 +210,17 @@ table.pei.11 <- a
 summary(M.ar2.pe.11)
 
 
-#### Industry 2 ###
+#### Industry ###
 ## Finance.and.insurance.53.Real.estate.and.rental.and.leasing
 ####
 
-f_pe_52 <- production_in_division_X52.Finance.and.insurance.53.Real.estate.and.rental.and.leasing ~ mean_temp
+f_pe_tot <- ovl_prod ~ mean_temp
 
-M_pe_52 <- Bcartime(formula=f_pe_52, data=p_pe, scol= "GeoUID", tcol="Date", 
-                    W=w_pe, model="ar", family="gaussian", package="CARBayesST",
+M_pe_tot <- Bcartime(formula=f_pe_tot, data=p_pe, scol= "GeoUID", tcol="Date", 
+                    W=w_pe, model="ar", AR = 2, family="gaussian", package="CARBayesST",
                     validrows = vs,
                     N=Ncar, burn.in=burn.in.car, thin=thin)
+
+## Use M_pe_tot to get the predictions
+
+
