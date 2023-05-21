@@ -44,9 +44,36 @@ list(
     method = "auto"
   ),
   tar_download(
-    name = download_hist,
-    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"), # nolint
-    paths = c("Data/CMIP5/hist.ncdf"),
+    name = download_cmip5_pcp,
+    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP2.6/monthly_ens/absolute/CMIP5_rcp2.6_monthly_abs_latlon1x1_PCP_pctl50_P1M.nc", # nolint
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP4.5/monthly_ens/absolute/CMIP5_rcp4.5_monthly_abs_latlon1x1_PCP_pctl50_P1M.nc",
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP8.5/monthly_ens/absolute/CMIP5_rcp8.5_monthly_abs_latlon1x1_PCP_pctl50_P1M.nc"
+    ), # nolint
+    paths = c("Data/CMIP5/futurepcplow.ncdf",
+              "Data/CMIP5/futurepcpmed.ncdf",
+              "Data/CMIP5/futurepcphigh.ncdf"),
+    method = "auto"
+  ),
+  tar_download(
+    name = download_cmip5_sndpt,
+    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP2.6/monthly_ens/absolute/CMIP5_rcp2.6_monthly_abs_latlon1x1_SNDPT_pctl50_P1M.nc", # nolint
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP4.5/monthly_ens/absolute/CMIP5_rcp4.5_monthly_abs_latlon1x1_SNDPT_pctl50_P1M.nc",
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP8.5/monthly_ens/absolute/CMIP5_rcp8.5_monthly_abs_latlon1x1_SNDPT_pctl50_P1M.nc"
+    ), # nolint
+    paths = c("Data/CMIP5/futuresndptlow.ncdf",
+              "Data/CMIP5/futuresndptmed.ncdf",
+              "Data/CMIP5/futuresndpthigh.ncdf"),
+    method = "auto"
+  ),
+  tar_download(
+    name = download_hist_cmip5,
+    urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc",
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_PCP_pctl50_P1M.nc",
+             "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_SNDPT_pctl50_P1M.nc"
+             ), # nolint
+    paths = c("Data/CMIP5/hist_temp.ncdf",
+              "Data/CMIP5/hist_pcp.ncdf",
+              "Data/CMIP5/hist_sndpt.ncdf"),
     method = "auto"
   ),
   #' ---
@@ -54,27 +81,61 @@ list(
   #' ---
    
   #' CMPI5
-  tar_target(name = raw_cmip5_hist,
-             command = rast("Data/CMIP5/hist.ncdf") %>%
+  tar_target(name = raw_cmip5_hist_temp,
+             command = rast("Data/CMIP5/hist_temp.ncdf") %>%
                modify_time_labels() %>%
                terra::wrap()
   ),
-  tar_target(name = cmip5_low,
+  tar_target(name = raw_cmip5_hist_pcp,
+             command = rast("Data/CMIP5/hist_pcp.ncdf") %>%
+               modify_time_labels() %>%
+               terra::wrap()
+  ),
+  tar_target(name = raw_cmip5_hist_sndpt,
+             command = rast("Data/CMIP5/hist_sndpt.ncdf") %>%
+               modify_time_labels() %>%
+               terra::wrap()
+  ),
+  tar_target(name = cmip5_low_temp,
              command = rast("Data/CMIP5/futuretemplow.ncdf") %>% 
                modify_time_labels() %>%
-               c(unwrap(raw_cmip5_hist)) %>%
+               c(unwrap(raw_cmip5_hist_temp)) %>%
                terra::wrap()
   ),
-  tar_target(name = cmip5_med,
+  tar_target(name = cmip5_med_temp,
              command = rast("Data/CMIP5/futuretempmed.ncdf") %>%
                modify_time_labels() %>%
-               c(unwrap(raw_cmip5_hist)) %>%
+               c(unwrap(raw_cmip5_hist_temp)) %>%
                terra::wrap()
   ),
-  tar_target(name = cmip5_high,
+  tar_target(name = cmip5_high_temp,
              command = rast("Data/CMIP5/futuretemphigh.ncdf") %>%
                modify_time_labels() %>%
-               c(unwrap(raw_cmip5_hist)) %>%
+               c(unwrap(raw_cmip5_hist_temp)) %>%
+               terra::wrap()
+  ),
+  tar_target(name = cmip5_low_pcp,
+             command = rast("Data/CMIP5/futurepcplow.ncdf") %>% 
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist_pcp)) %>%
+               terra::wrap()
+  ),
+  tar_target(name = cmip5_high_pcp,
+             command = rast("Data/CMIP5/futurepcphigh.ncdf") %>%
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist_pcp)) %>%
+               terra::wrap()
+  ),
+  tar_target(name = cmip5_low_sndpt,
+             command = rast("Data/CMIP5/futuresndptlow.ncdf") %>% 
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist_sndpt)) %>%
+               terra::wrap()
+  ),
+  tar_target(name = cmip5_high_sndpt,
+             command = rast("Data/CMIP5/futuresndpthigh.ncdf") %>%
+               modify_time_labels() %>%
+               c(unwrap(raw_cmip5_hist_sndpt)) %>%
                terra::wrap()
   ),
 
@@ -121,7 +182,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_ON_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_mb,
@@ -129,7 +190,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_MB_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_sk,
@@ -137,7 +198,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_SK_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_ab,
@@ -145,7 +206,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_AB_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_qc,
@@ -153,7 +214,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_QC_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_bc,
@@ -161,7 +222,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_BC_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_nu,
@@ -169,7 +230,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_NU_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_nt,
@@ -177,7 +238,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_NT_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_yt,
@@ -185,7 +246,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_YT_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_nb,
@@ -193,7 +254,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_NB_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_nl,
@@ -201,7 +262,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_NL_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_ns,
@@ -209,7 +270,7 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_NS_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   tar_target(name = raw_geom_data_pe,
@@ -217,22 +278,55 @@ list(
        geojson_read("Data/geojson_files/1.a_census_data_PE_CSD_geometry_only.geojson", # nolint
                     what = "sp") %>%
         st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist)))
+        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
     }
   ),
   #' PRODUCTIVITY DATA
   #' ---
   #' put the productivity data here.
   #' ---
-  tar_target(name = pe_ts_test,
+  tar_target(name = pe_ts,
     command = {
       raw_prod_data_pe %>%
-        filter(Date < "2022") %>%
+        filter(Date < "2001") %>%
         mutate(
-          mean_temp = mapply(
+          mean_temp_high = mapply(
             getmean_geouid,
             MoreArgs = list(
-              country_raster = unwrap(cmip5_med),
+              country_raster = unwrap(cmip5_high_temp),
+              census_geoms = raw_geom_data_pe
+            ),
+            geouid = GeoUID,
+            time = Date
+          )
+        ) %>%
+        mutate(
+          mean_temp_low = mapply(
+            getmean_geouid,
+            MoreArgs = list(
+              country_raster = unwrap(cmip5_low_temp),
+              census_geoms = raw_geom_data_pe
+            ),
+            geouid = GeoUID,
+            time = Date
+          )
+        ) %>%
+        mutate(
+          mean_pcp_low = mapply(
+            getmean_geouid,
+            MoreArgs = list(
+              country_raster = unwrap(cmip5_low_pcp),
+              census_geoms = raw_geom_data_pe
+            ),
+            geouid = GeoUID,
+            time = Date
+          )
+        ) %>%
+        mutate(
+          mean_pcp_high = mapply(
+            getmean_geouid,
+            MoreArgs = list(
+              country_raster = unwrap(cmip5_high_pcp),
               census_geoms = raw_geom_data_pe
             ),
             geouid = GeoUID,
@@ -241,40 +335,7 @@ list(
         )
     }
   ),
-  tar_target(name = nl_ts_test,
-             command = {
-               raw_prod_data_nl %>%
-                 filter(Date < "2000") %>%
-                 mutate(
-                   mean_temp = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_med),
-                       census_geoms = raw_geom_data_nl
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 )
-             }
-  ),
-  tar_target(name = on_ts_test,
-             command = {
-               raw_prod_data_on %>%
-                 filter(Date < "2000") %>%
-                 mutate(
-                   mean_temp = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_med),
-                       census_geoms = raw_geom_data_on
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 )
-             }
-  ),
+
 
   #' ---
   #' DATA PROCESSING ----------------------------

@@ -5,18 +5,21 @@ author:
     affil: 1
   - name: Abhiroop Chowdhury
     affil: 1
-Mentor:
-  - name: Dr.Pratheepa Jeganatha
+  - name: "Mentor: Dr.Pratheepa Jeganathan"
     affil: 1
+
 affiliation:
   - num: 1
     address: Department of Mathematics and Statistics, McMaster University
 column_numbers: 3
-logoleft_name: https&#58;//raw.githubusercontent.com/brentthorne/posterdown/master/images/betterhexlogo.png
+logoleft_name: crest.png
 output: 
   posterdown::posterdown_html:
     self_contained: false
 bibliography: packages.bib
+primary_colour: "#7A003C"
+secondary_colour: "#5E6A71"
+accent_colour: "#FDBF57"
 ---
 
 ```{r setup, include=FALSE}
