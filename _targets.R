@@ -290,7 +290,7 @@ list(
   tar_target(name = pe_ts,
     command = {
       raw_prod_data_pe %>%
-        filter(Date < "2001-01-01") %>%
+        filter(Date < "2035-01-01") %>%
         mutate(
           mean_temp_high = mapply(
             getmean_geouid,
@@ -340,7 +340,7 @@ list(
   tar_target(name = on_ts,
              command = {
                raw_prod_data_on %>%
-                 filter(Date < "2001-01-01") %>%
+                 filter(Date < "2035-01-01") %>%
                  mutate(
                    mean_temp_high = mapply(
                      getmean_geouid,
@@ -390,7 +390,7 @@ list(
   tar_target(name = ab_ts,
              command = {
                raw_prod_data_ab %>%
-                 filter(Date < "2001-01-01") %>%
+                 filter(Date < "2035-01-01") %>%
                  mutate(
                    mean_temp_high = mapply(
                      getmean_geouid,
