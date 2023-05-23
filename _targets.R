@@ -11,20 +11,21 @@ tar_option_set(
                "zoo",
                "lubridate",
                "tidyr",
-               "geojsonio",
                "broom",
                "bayesplot",
                "quarto",
-               "patchwork"), # packages that your targets need to run
+               "patchwork",
+               "raster",
+               "terra"), # packages that your targets need to run
   format = "rds" # default storage format
 )
 
-options(clustermq.scheduler = "multicore")
+# options(clustermq.scheduler = "multicore")
 
-# options(
-#   clustermq.scheduler = "ssh",
-#   clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this 
-# )
+options(
+  clustermq.scheduler = "ssh",
+  clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this
+)
 
 tar_source()
 
@@ -37,7 +38,7 @@ list(
     urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP2.6/monthly_ens/absolute/CMIP5_rcp2.6_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc", # nolint
              "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP4.5/monthly_ens/absolute/CMIP5_rcp4.5_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc",
              "https://dd.weather.gc.ca/climate/cmip5/netcdf/scenarios/RCP8.5/monthly_ens/absolute/CMIP5_rcp8.5_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc"
-             ), # nolint
+    ), # nolint
     paths = c("Data/CMIP5/futuretemplow.ncdf",
               "Data/CMIP5/futuretempmed.ncdf",
               "Data/CMIP5/futuretemphigh.ncdf"),
@@ -70,7 +71,7 @@ list(
     urls = c("https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_TEMP_pctl50_P1M.nc",
              "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_PCP_pctl50_P1M.nc",
              "https://dd.weather.gc.ca/climate/cmip5/netcdf/historical/monthly_ens/absolute/CMIP5_hist_monthly_abs_latlon1x1_SNDPT_pctl50_P1M.nc"
-             ), # nolint
+    ), # nolint
     paths = c("Data/CMIP5/hist_temp.ncdf",
               "Data/CMIP5/hist_pcp.ncdf",
               "Data/CMIP5/hist_sndpt.ncdf"),
@@ -79,87 +80,101 @@ list(
   #' ---
   #' READ IN THE RAW DATA ----------------------------
   #' ---
-   
+  
   #' CMPI5
   tar_target(name = raw_cmip5_hist_temp,
-             command = rast("Data/CMIP5/hist_temp.ncdf") %>%
+             command = rast(download_hist_cmip5[1]) %>%
                modify_time_labels() %>%
                terra::wrap()
   ),
   tar_target(name = raw_cmip5_hist_pcp,
-             command = rast("Data/CMIP5/hist_pcp.ncdf") %>%
+             command = rast(download_hist_cmip5[2]) %>%
                modify_time_labels() %>%
                terra::wrap()
   ),
   tar_target(name = raw_cmip5_hist_sndpt,
-             command = rast("Data/CMIP5/hist_sndpt.ncdf") %>%
+             command = rast(download_hist_cmip5[3]) %>%
                modify_time_labels() %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_low_temp,
-             command = rast("Data/CMIP5/futuretemplow.ncdf") %>% 
+             command = rast(download_cmip5_temp[1]) %>% 
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_temp)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_med_temp,
-             command = rast("Data/CMIP5/futuretempmed.ncdf") %>%
+             command = rast(download_cmip5_temp[2]) %>%
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_temp)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_high_temp,
-             command = rast("Data/CMIP5/futuretemphigh.ncdf") %>%
+             command = rast(download_cmip5_temp[3]) %>%
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_temp)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_low_pcp,
-             command = rast("Data/CMIP5/futurepcplow.ncdf") %>% 
+             command = rast(download_cmip5_pcp[1]) %>% 
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_pcp)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_high_pcp,
-             command = rast("Data/CMIP5/futurepcphigh.ncdf") %>%
+             command = rast(download_cmip5_pcp[3]) %>%
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_pcp)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_low_sndpt,
-             command = rast("Data/CMIP5/futuresndptlow.ncdf") %>% 
+             command = rast(download_cmip5_pcp[1]) %>% 
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_sndpt)) %>%
                terra::wrap()
   ),
   tar_target(name = cmip5_high_sndpt,
-             command = rast("Data/CMIP5/futuresndpthigh.ncdf") %>%
+             command = rast(download_cmip5_pcp[3]) %>%
                modify_time_labels() %>%
                c(unwrap(raw_cmip5_hist_sndpt)) %>%
                terra::wrap()
   ),
-
+  
   #' PRODUCTIVITY
   tar_target(name = raw_prod_data_ab,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inAlberta.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inAlberta.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_bc,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inBritish Columbia.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inBritish Columbia.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_mb,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inManitoba.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inManitoba.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_nb,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNew Brunswick.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNew Brunswick.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_nl,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNewfoundland and Labrador.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNewfoundland and Labrador.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_ns,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNova Scotia.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inNova Scotia.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_on,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inOntario.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inOntario.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_pe,
              command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inPrince Edward Island.csv") %>% 
@@ -167,284 +182,207 @@ list(
                complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_qc,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inQuebec.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inQuebec.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   tar_target(name = raw_prod_data_sk,
-             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inSaskatchewan.csv")
+             command = read.csv("Data/Productivity per NAICS within region/4.c_production_in_CSD_inSaskatchewan.csv") %>% 
+               mutate(Date = as.Date(Date)) %>%
+               complete(GeoUID, provincename, Date = seq.Date(min(Date), as.Date("2035-01-01"), by = "month"))
   ),
   
-  #' CLIMATE — WEATHER STATION DATA
-  tar_target(name = raw_station_data,
-    command = read.csv("Data/climate_data/weather_Station_data.csv")
-  ),
-
-  #' GEOMS: CENSUS AREA
+  #' GeoJson Reads. 
   tar_target(name = raw_geom_data_on,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_ON_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_ON_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_mb,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_MB_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_MB_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_sk,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_SK_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_SK_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_ab,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_AB_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_AB_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_qc,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_QC_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_QC_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_bc,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_BC_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_BC_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_nu,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_NU_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_NU_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_nt,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_NT_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_NT_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_yt,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_YT_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_YT_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_nb,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_NB_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_NB_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_nl,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_NL_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_NL_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_ns,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_NS_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_NS_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   tar_target(name = raw_geom_data_pe,
-    command = {
-       geojson_read("Data/geojson_files/1.a_census_data_PE_CSD_geometry_only.geojson", # nolint
-                    what = "sp") %>%
-        st_as_sf() %>%
-        st_transform(crs = crs(unwrap(raw_cmip5_hist_temp)))
-    }
+             command = {
+               sf::st_read("Data/geojson_files/1.a_census_data_PE_CSD_geometry_only.geojson") %>%
+                 sf::st_transform(crs = sf::st_crs(unwrap(raw_cmip5_hist_temp)))
+             }
   ),
   #' PRODUCTIVITY DATA
   #' ---
   #' put the productivity data here.
   #' ---
   tar_target(name = pe_ts,
-    command = {
-      raw_prod_data_pe %>%
-        filter(Date < "2035-01-01") %>%
-        mutate(
-          mean_temp_high = mapply(
-            getmean_geouid,
-            MoreArgs = list(
-              country_raster = unwrap(cmip5_high_temp),
-              census_geoms = raw_geom_data_pe
-            ),
-            geouid = GeoUID,
-            time = Date
-          )
-        ) %>%
-        mutate(
-          mean_temp_low = mapply(
-            getmean_geouid,
-            MoreArgs = list(
-              country_raster = unwrap(cmip5_low_temp),
-              census_geoms = raw_geom_data_pe
-            ),
-            geouid = GeoUID,
-            time = Date
-          )
-        ) %>%
-        mutate(
-          mean_pcp_low = mapply(
-            getmean_geouid,
-            MoreArgs = list(
-              country_raster = unwrap(cmip5_low_pcp),
-              census_geoms = raw_geom_data_pe
-            ),
-            geouid = GeoUID,
-            time = Date
-          )
-        ) %>%
-        mutate(
-          mean_pcp_high = mapply(
-            getmean_geouid,
-            MoreArgs = list(
-              country_raster = unwrap(cmip5_high_pcp),
-              census_geoms = raw_geom_data_pe
-            ),
-            geouid = GeoUID,
-            time = Date
-          )
-        )
-    }
+             command = {
+               command = transform_df(raw_prod_data_pe,
+                                      raw_geom_data_pe,
+                                      "1999-05-05",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
   ),
   tar_target(name = on_ts,
              command = {
-               raw_prod_data_on %>%
-                 filter(Date < "2035-01-01") %>%
-                 mutate(
-                   mean_temp_high = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_high_temp),
-                       census_geoms = raw_geom_data_on
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_temp_low = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_low_temp),
-                       census_geoms = raw_geom_data_on
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_pcp_low = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_low_pcp),
-                       census_geoms = raw_geom_data_on
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_pcp_high = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_high_pcp),
-                       census_geoms = raw_geom_data_on
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 )
+               command = transform_df(raw_prod_data_on,
+                                      raw_geom_data_on,
+                                      "1999-02-02",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
              }
   ),
   tar_target(name = ab_ts,
              command = {
-               raw_prod_data_ab %>%
-                 filter(Date < "2035-01-01") %>%
-                 mutate(
-                   mean_temp_high = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_high_temp),
-                       census_geoms = raw_geom_data_ab
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_temp_low = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_low_temp),
-                       census_geoms = raw_geom_data_ab
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_pcp_low = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_low_pcp),
-                       census_geoms = raw_geom_data_ab
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 ) %>%
-                 mutate(
-                   mean_pcp_high = mapply(
-                     getmean_geouid,
-                     MoreArgs = list(
-                       country_raster = unwrap(cmip5_high_pcp),
-                       census_geoms = raw_geom_data_ab
-                     ),
-                     geouid = GeoUID,
-                     time = Date
-                   )
-                 )
+               command = transform_df(raw_prod_data_ab,
+                                      raw_geom_data_ab,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
              }
   ),
-
-
-  #' ---
-  #' DATA PROCESSING ----------------------------
-  #' ---
-  tar_target(name = tidy_weather_station_data,
-    command = {
-      tidy_climate(raw_station_data)
-    }
+  tar_target(name = nl_ts,
+             command = {
+               command = transform_df(raw_prod_data_nl,
+                                      raw_geom_data_nl,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = mb_ts,
+             command = {
+               command = transform_df(raw_prod_data_mb,
+                                      raw_geom_data_mb,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = bc_ts,
+             command = {
+               command = transform_df(raw_prod_data_bc,
+                                      raw_geom_data_bc,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = sk_ts,
+             command = {
+               command = transform_df(raw_prod_data_sk,
+                                      raw_geom_data_sk,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = qc_ts,
+             command = {
+               command = transform_df(raw_prod_data_qc,
+                                      raw_geom_data_qc,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = nb_ts,
+             command = {
+               command = transform_df(raw_prod_data_nb,
+                                      raw_geom_data_nb,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
+  ),
+  tar_target(name = ns_ts,
+             command = {
+               command = transform_df(raw_prod_data_ns,
+                                      raw_geom_data_ns,
+                                      "2001-01-01",
+                                      cmip5_high_temp,
+                                      cmip5_low_temp,
+                                      cmip5_low_pcp,
+                                      cmip5_high_pcp)
+             }
   )
 )
