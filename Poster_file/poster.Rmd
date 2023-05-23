@@ -24,6 +24,7 @@ accent_colour: "#FDBF57"
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library(targets)
 ```
 
 # Background

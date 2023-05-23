@@ -1,6 +1,11 @@
 library(spdep)
 
-create_neighbors_list <- function(geom_data) {
+create_neighbors_list <- function(geom_data, prov_ts) {
+  
+  space_ids <- unique(prov_ts$s)
+  
+  geom_data <- geom_data[space_ids,]
+  
   sf_use_s2(FALSE)
   geom_data <- as_Spatial(geom_data)
   

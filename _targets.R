@@ -280,7 +280,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_pe,
                                       raw_geom_data_pe,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -291,7 +291,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_on,
                                       raw_geom_data_on,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -302,7 +302,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_ab,
                                       raw_geom_data_ab,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -313,7 +313,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_nl,
                                       raw_geom_data_nl,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -324,7 +324,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_mb,
                                       raw_geom_data_mb,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -335,7 +335,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_bc,
                                       raw_geom_data_bc,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -346,7 +346,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_sk,
                                       raw_geom_data_sk,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -357,7 +357,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_qc,
                                       raw_geom_data_qc,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -368,7 +368,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_nb,
                                       raw_geom_data_nb,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -379,7 +379,7 @@ list(
              command = {
                command = transform_df(raw_prod_data_ns,
                                       raw_geom_data_ns,
-                                      "2035-01-01",
+                                      "2030-01-01",
                                       cmip5_high_temp,
                                       cmip5_low_temp,
                                       cmip5_low_pcp,
@@ -388,7 +388,7 @@ list(
   ),
   tar_target(name = weightmat_pe,
              command = {
-               nb_results <- create_neighbors_list(raw_geom_data_pe)
+               nb_results <- create_neighbors_list(raw_geom_data_pe, pe_ts)
                create_neighborhood_matrix(nb_results$nb)
              }
   ),
@@ -437,13 +437,7 @@ list(
 
       train <- pe_ts %>%
         filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s) %>%
-        filter(GeoUID %in% unique(train$GeoUID[is.na(train$tot_prod)])) %>%
-        mutate(mean_temp_high = unlist(mean_temp_high),
-               mean_pcp_high = unlist(mean_pcp_high),
-               mean_temp_low = unlist(mean_temp_low),
-               mean_pcp_low = unlist(mean_pcp_low)
-               )
+        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
         
 
       # Validation Rows
