@@ -459,6 +459,9 @@ list(
                N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
 
     }
+  ),
+  tar_render(name = poster,
+             "Poster_file/poster.rmd"
   )
   
   
