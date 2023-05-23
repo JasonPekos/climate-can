@@ -24,93 +24,31 @@ Google fonts api stuff
 
 
 
-<style type="text/css">pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
-pre > code.sourceCode > span:empty { height: 1.2em; }
-.sourceCode { overflow: visible; }
-code.sourceCode > span { color: inherit; text-decoration: inherit; }
-div.sourceCode { margin: 1em 0; }
-pre.sourceCode { margin: 0; }
-@media screen {
-div.sourceCode { overflow: auto; }
-}
-@media print {
-pre > code.sourceCode { white-space: pre-wrap; }
-pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
-}
-pre.numberSource code
-  { counter-reset: source-line 0; }
-pre.numberSource code > span
-  { position: relative; left: -4em; counter-increment: source-line; }
-pre.numberSource code > span > a:first-child::before
-  { content: counter(source-line);
-    position: relative; left: -1em; text-align: right; vertical-align: baseline;
-    border: none; display: inline-block;
-    -webkit-touch-callout: none; -webkit-user-select: none;
-    -khtml-user-select: none; -moz-user-select: none;
-    -ms-user-select: none; user-select: none;
-    padding: 0 4px; width: 4em;
-    color: #aaaaaa;
-  }
-pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
-div.sourceCode
-  {   }
-@media screen {
-pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
-}
-code span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code span.at { color: #7d9029; } /* Attribute */
-code span.bn { color: #40a070; } /* BaseN */
-code span.bu { color: #008000; } /* BuiltIn */
-code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code span.ch { color: #4070a0; } /* Char */
-code span.cn { color: #880000; } /* Constant */
-code span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code span.dt { color: #902000; } /* DataType */
-code span.dv { color: #40a070; } /* DecVal */
-code span.er { color: #ff0000; font-weight: bold; } /* Error */
-code span.ex { } /* Extension */
-code span.fl { color: #40a070; } /* Float */
-code span.fu { color: #06287e; } /* Function */
-code span.im { color: #008000; font-weight: bold; } /* Import */
-code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
-code span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code span.op { color: #666666; } /* Operator */
-code span.ot { color: #007020; } /* Other */
-code span.pp { color: #bc7a00; } /* Preprocessor */
-code span.sc { color: #4070a0; } /* SpecialChar */
-code span.ss { color: #bb6688; } /* SpecialString */
-code span.st { color: #4070a0; } /* String */
-code span.va { color: #19177c; } /* Variable */
-code span.vs { color: #4070a0; } /* VerbatimString */
-code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */</style>
+
 
 <style>
 @page {
-size: 45in 38in;
+size: 72in 48in;
 margin: 0;
 padding: 0;
 }
 body {
 margin: 0;
 font-size: 45px;
-width: 45in;
-height: 38in;
+width: 72in;
+height: 48in;
 padding: 0;
 text-align: justify;
 font-family: Palatino;
 }
 .poster_wrap {
-width: 45in;
-height: 38in;
+width: 72in;
+height: 48in;
 padding: 0cm;
 }
 .title_container {
-width: 45in;
-height: calc(38in * 0.15);
+width: 72in;
+height: calc(48in * 0.15);
 overflow: hidden;
 background-color: #7A003C;
 border: 0 solid #5E6A71;
@@ -198,10 +136,10 @@ border: 0;
 font-weight: normal;
 }
 .poster_body_wrap{
-width: calc(45in + 0 + 0);
-height: calc(38in * 0.83);
-padding-top: calc(38in * 0.005);
-padding-bottom: calc(38in * 0.01);
+width: calc(72in + 0 + 0);
+height: calc(48in * 0.83);
+padding-top: calc(48in * 0.005);
+padding-bottom: calc(48in * 0.01);
 background-color: #ffffff;
 }
 .poster_title h3 {
@@ -358,230 +296,69 @@ font-size: 20pt;
 <div class='poster_body'>
 <div id="background" class="section level1">
 <h1>Background</h1>
-<p>Welcome to <code>posterdown</code> ! This is my attempt to provide a semi-smooth workflow for those who wish to take their R Markdown skills to the conference world. Most features from R Markdown are available in this package such as Markdown section notation, figure captioning, and even citations like this one <span class="citation">(Allaire et al. 2022)</span>. The rest of this example poster will show how you can insert typical conference poster features into your own document.</p>
+<p>In an atmosphere of increased concern around anthropogenic climate change, questions naturally arise about the impact of
+our changing climate on industrial productivity.</p>
+<p>Climate change manifests not only as increases in global mean temperature;
+high emissions scenarios also correspond with increased variability in climate events, as
+well as differing precipitation patterns.</p>
+<p>To examine the impact of these changes, we model productivity as a function of relevant climate variables in both
+a low emission and high emission scenario. This allows us to compare model predictions across scenarios holding all else constant, naturally removing secular and seasonal trends in productivity at any given time-point.</p>
 <div id="objectives" class="section level2">
 <h2>Objectives</h2>
 <ol style="list-style-type: decimal">
-<li>Easy to use reproducible poster design.</li>
-<li>Integration with R Markdown.</li>
-<li>Easy transition from <code>posterdown</code> to <code>pagedown</code> report or manuscript documents <span class="citation">(Xie et al. 2022)</span>.</li>
+<li><p>Fit a variety of model forms to historical climate and productivity data, performing model selection via WAIC and DIC.</p></li>
+<li><p>Use the posterior predictive distributions from the best-performing model(s) to forecast future productivity in response to CMIP5 climate predictions.</p></li>
+<li><p>Build a reproducible workflow with the ability to use most modern pre-baked climate models as drop-in replacements for the standard Canadian CMIP5 ensemble. We also maintain flexibility around the specific form of the Bayesian GLM used, allowing further extensions with regards to spatial hierarchy and temporal dependence. This workflow also allows for the use of accelerated computing via the ComputeCanada clusters, with data and worker transfer handled automatically, ensuring that all work can be done from a local machine.</p></li>
 </ol>
+</div>
+</div>
+<div id="exploratory-analysis-of-relevant-data" class="section level1">
+<h1>Exploratory Analysis of Relevant Data</h1>
+<div id="climate" class="section level2">
+<h2>Climate</h2>
+<p>We chose to use the CMIP5 ensemble data over the other two relevant options: <strong>(1)</strong> building a custom smooth over provided weather station data, or <strong>(2)</strong> using a more modern climate model, e.g. a CMIP6 ensemble. The decision to use CMIP5 over CMIP6 comes down purely to data availability — the government of Canada has not yet made it’s CMIP6 ensemble available for bulk download. Recognizing that the practical utility of a project like this requires modern data, we built this project to allow such data to be used as a drop-in replacement at whatever time it becomes publicly available.</p>
+<p>The decision to not build a custom model over data from the provided weather stations came out of a recognition that such model would necessarily perform poorly, as it could not possibly take into account relevant geological factors — e.g. mountain ranges, weather patterns, and water coverage (lakes and oceans). Using climate model data also allows us to compute the posterior predictive distribution at future time-points, something not possible with only historical weather data.</p>
+<div id="historical-data-and-future-predictions" class="section level3">
+<h3>Historical Data and Future Predictions:</h3>
+<p>Historical data is provided as a single monthly trend of <code>1x1</code> degree spatial cells. At the time in which the CMIP5 model was computed — Jan 1st, 2006 — the output splits into two trends representing different climate scenarios, in the same format as the historical data.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-1"></span>
+<img src="poster_files/figure-html/unnamed-chunk-1-1.png" alt="CMIP5 Data" width="80%" />
+<p class="caption">
+Figure 1: CMIP5 Data
+</p>
+</div>
+</div>
+</div>
+<div id="productivity" class="section level2">
+<h2>Productivity</h2>
 </div>
 </div>
 <div id="methods" class="section level1">
 <h1>Methods</h1>
-<p>This package uses the same workflow approach as the R Markdown you know and love. Basically it goes from RMarkdown &gt; Knitr &gt; Markdown &gt; Pandoc &gt; HTML/CSS &gt; PDF. You can even use the bibliography the same way <span class="citation">(Thorne 2019)</span>.</p>
+<div id="arial-unit-preprocessing" class="section level2">
+<h2>Arial Unit Preprocessing</h2>
+<p>Productivity is only available on the level of census regions — irregular polygons, or sets of polygons. Alternatively,
+CMIP5 climate data is available on the level of <code>1x1</code> degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data.</p>
+<p>It’s also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting.</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-2"></span>
+<img src="poster_files/figure-html/unnamed-chunk-2-1.png" alt="Processing Data" width="80%" />
+<p class="caption">
+Figure 2: Processing Data
+</p>
+</div>
+</div>
+<div id="automatic-workflow" class="section level2">
+<h2>Automatic Workflow</h2>
+<p>We leverage <code>targets</code> — a make-like utility in R — to build a reproducible scientific workflow for our modelling process.</p>
+<p>This allows us to easily swap out components of our modelling pipeline — for example, different climate models, different productivity data, or different predictive models — while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH.</p>
+<p>In the interest of reproducible science, everything related to this submission — including this poster itself, and all graphics and model output included inside — can be remade in a one-line R command:</p>
+</div>
 </div>
 <div id="results" class="section level1">
 <h1>Results</h1>
-<p>Usually you want to have a nice table displaying some important results that you have calculated. In <code>posterdown</code> this is as easy as using the <code>kable</code> table formatting you are probably use to as per typical R Markdown formatting.</p>
-<p>You can reference tables like so: Table <a href="#tab:mytable">1</a>. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam placerat augue at velit tincidunt semper. Donec elementum porta posuere. Nullam interdum, odio at tincidunt feugiat, turpis nisi blandit eros, eu posuere risus felis non quam. Nam eget lorem odio. Duis et aliquet orci. Phasellus nec viverra est.</p>
-<table>
-<caption>
-<span id="tab:mytable">Table 1: </span>Table caption.
-</caption>
-<thead>
-<tr>
-<th style="text-align:center;">
-Sepal.Length
-</th>
-<th style="text-align:center;">
-Sepal.Width
-</th>
-<th style="text-align:center;">
-Petal.Length
-</th>
-<th style="text-align:center;">
-Petal.Width
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">
-5.1
-</td>
-<td style="text-align:center;">
-3.5
-</td>
-<td style="text-align:center;">
-1.4
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.9
-</td>
-<td style="text-align:center;">
-3.0
-</td>
-<td style="text-align:center;">
-1.4
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.7
-</td>
-<td style="text-align:center;">
-3.2
-</td>
-<td style="text-align:center;">
-1.3
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.6
-</td>
-<td style="text-align:center;">
-3.1
-</td>
-<td style="text-align:center;">
-1.5
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5.0
-</td>
-<td style="text-align:center;">
-3.6
-</td>
-<td style="text-align:center;">
-1.4
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5.4
-</td>
-<td style="text-align:center;">
-3.9
-</td>
-<td style="text-align:center;">
-1.7
-</td>
-<td style="text-align:center;">
-0.4
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.6
-</td>
-<td style="text-align:center;">
-3.4
-</td>
-<td style="text-align:center;">
-1.4
-</td>
-<td style="text-align:center;">
-0.3
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-5.0
-</td>
-<td style="text-align:center;">
-3.4
-</td>
-<td style="text-align:center;">
-1.5
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.4
-</td>
-<td style="text-align:center;">
-2.9
-</td>
-<td style="text-align:center;">
-1.4
-</td>
-<td style="text-align:center;">
-0.2
-</td>
-</tr>
-<tr>
-<td style="text-align:center;">
-4.9
-</td>
-<td style="text-align:center;">
-3.1
-</td>
-<td style="text-align:center;">
-1.5
-</td>
-<td style="text-align:center;">
-0.1
-</td>
-</tr>
-</tbody>
-</table>
-<p>Or with figures: Figure <a href="#fig:standard-plot">1</a>, or Figure <a href="#fig:morefigs">2</a>.</p>
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:standard-plot"></span>
-<img src="poster_files/figure-html/standard-plot-1.png" alt="Great figure!" width="80%" />
-<p class="caption">
-Figure 1: Great figure!
-</p>
 </div>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> iris</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="at">x =</span> data<span class="sc">$</span>Sepal.Length, </span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>     <span class="at">y =</span> data<span class="sc">$</span>Sepal.Width, </span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>     <span class="at">col =</span> data<span class="sc">$</span>Species,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>     <span class="at">pch =</span> <span class="dv">19</span>, </span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>     <span class="at">xlab =</span> <span class="st">&quot;Sepal Length (cm)&quot;</span>,</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>     <span class="at">ylab =</span> <span class="st">&quot;Sepal Width (cm)&quot;</span>)</span></code></pre></div>
-<div class="figure"><span style="display:block;" id="fig:morefigs"></span>
-<img src="poster_files/figure-html/morefigs-1.png" alt="Amazing, right?!" width="80%" />
-<p class="caption">
-Figure 2: Amazing, right?!
-</p>
-</div>
-</div>
-<div id="next-steps" class="section level1">
-<h1>Next Steps</h1>
-<p>Aliquam sed faucibus risus, quis efficitur erat. Vestibulum semper mauris quis tempus eleifend. Aliquam sagittis dictum ipsum, quis viverra ligula eleifend ut. Curabitur sagittis vitae arcu eget faucibus. In non elementum felis. Duis et aliquam nunc. Nunc pulvinar sapien nunc, vel pretium nisi efficitur in. Fusce fringilla maximus leo et maximus. Fusce at ligula laoreet, iaculis mi at, auctor odio. Praesent sed elementum justo. Aenean consectetur risus rhoncus tincidunt efficitur. Praesent dictum mauris at diam maximus maximus <span class="citation">(Thorne 2019)</span>.</p>
-</div>
-<div id="conclusion" class="section level1">
-<h1>Conclusion</h1>
-<p>Try <code>posterdown</code> out! Hopefully you like it!</p>
-</div>
-<div id="references" class="section level1 unnumbered">
+<div id="references" class="section level1">
 <h1>References</h1>
-<div id="refs" class="references csl-bib-body hanging-indent">
-<div id="ref-R-rmarkdown" class="csl-entry">
-Allaire, JJ, Yihui Xie, Jonathan McPherson, Javier Luraschi, Kevin Ushey, Aron Atkins, Hadley Wickham, Joe Cheng, Winston Chang, and Richard Iannone. 2022. <em>Rmarkdown: Dynamic Documents for r</em>. <a href="https://CRAN.R-project.org/package=rmarkdown">https://CRAN.R-project.org/package=rmarkdown</a>.
-</div>
-<div id="ref-R-posterdown" class="csl-entry">
-Thorne, Brent. 2019. <em>Posterdown: Generate PDF Conference Posters Using r Markdown</em>. <a href="https://github.com/brentthorne/posterdown">https://github.com/brentthorne/posterdown</a>.
-</div>
-<div id="ref-R-pagedown" class="csl-entry">
-Xie, Yihui, Romain Lesur, Brent Thorne, and Xianying Tan. 2022. <em>Pagedown: Paginate the HTML Output of r Markdown with CSS for Print</em>. <a href="https://github.com/rstudio/pagedown">https://github.com/rstudio/pagedown</a>.
-</div>
-</div>
 </div>
 </div>
 </div>

@@ -454,6 +454,16 @@ list(
 
     }
   ),
+  
+  # Poster stuff
+  tar_target(name = mean_trends,
+             command = {
+               list("hist"= getmean_raster(unwrap(raw_cmip5_hist_temp), 1165:1260),
+                    "high"= getmean_raster(unwrap(cmip5_high_temp), 1:289),
+                    "low" = getmean_raster(unwrap(cmip5_low_temp), 1:289))
+             }
+  ),
+  
   tar_render(name = poster,
              "Poster_file/poster.rmd"
   )
