@@ -394,12 +394,12 @@ list(
   ),
   tar_target(name = weightmat_on,
              command = {
-               nb_results <- create_neighbors_list(raw_geom_data_on)
+               nb_results <- create_neighbors_list(raw_geom_data_on, on_ts)
              }
   ),
   # tar_target(name = weightmat_bc,
   #            command = {
-  #              nb_results <- create_neighbors_list(raw_geom_data_bc)
+  #              nb_results <- create_neighbors_list(raw_geom_data_bc, bc_ts)
   #              create_neighborhood_matrix(nb_results$nb)
   #            }
   # ),
@@ -411,13 +411,13 @@ list(
   # ),
   tar_target(name = weightmat_ab,
              command = {
-               nb_results <- create_neighbors_list(raw_geom_data_ab)
+               nb_results <- create_neighbors_list(raw_geom_data_ab, ab_ts)
                create_neighborhood_matrix(nb_results$nb)
              }
   ),
   tar_target(name = weightmat_sk,
              command = {
-               nb_results <- create_neighbors_list(raw_geom_data_sk)
+               nb_results <- create_neighbors_list(raw_geom_data_sk, sk_ts)
                create_neighborhood_matrix(nb_results$nb)
              }
   ),
@@ -457,6 +457,4 @@ list(
   tar_render(name = poster,
              "Poster_file/poster.rmd"
   )
-  
-  
 )
