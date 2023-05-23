@@ -16,16 +16,17 @@ tar_option_set(
                "quarto",
                "patchwork",
                "raster",
-               "terra"), # packages that your targets need to run
+               "terra",
+               "bmstdr"), # packages that your targets need to run
   format = "rds" # default storage format
 )
 
-# options(clustermq.scheduler = "multicore")
+options(clustermq.scheduler = "multicore")
 
-options(
-  clustermq.scheduler = "ssh",
-  clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this
-)
+# options(
+#   clustermq.scheduler = "ssh",
+#   clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this
+# )
 
 tar_source()
 
@@ -384,5 +385,81 @@ list(
                                       cmip5_low_pcp,
                                       cmip5_high_pcp)
              }
+  ),
+  tar_target(name = weightmat_pe,
+             command = {
+               nb_results <- create_neighbors_list(raw_geom_data_pe)
+               create_neighborhood_matrix(nb_results$nb)
+             }
+  ),
+  tar_target(name = weightmat_on,
+             command = {
+               nb_results <- create_neighbors_list(raw_geom_data_on)
+             }
+  ),
+  # tar_target(name = weightmat_bc,
+  #            command = {
+  #              nb_results <- create_neighbors_list(raw_geom_data_bc)
+  #              create_neighborhood_matrix(nb_results$nb)
+  #            }
+  # ),
+  # tar_target(name = weightmat_nl,
+  #            command = {
+  #              nb_results <- create_neighbors_list(raw_geom_data_nl)
+  #              create_neighborhood_matrix(nb_results$nb)
+  #            }
+  # ),
+  tar_target(name = weightmat_ab,
+             command = {
+               nb_results <- create_neighbors_list(raw_geom_data_ab)
+               create_neighborhood_matrix(nb_results$nb)
+             }
+  ),
+  tar_target(name = weightmat_sk,
+             command = {
+               nb_results <- create_neighbors_list(raw_geom_data_sk)
+               create_neighborhood_matrix(nb_results$nb)
+             }
+  ),
+  # MODELING
+  tar_target(
+    name = mcmc_pars,
+    command = list(
+      "samples" = 5000,
+      "burnin" = 1000,
+      "thin" = 10
+    )
+   ),
+  tar_target(
+    name = ar2_train_pe,
+    command = {
+      train <- pe_ts
+
+      train <- pe_ts %>%
+        filter(Date < "2006-01-01") %>%
+        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s) %>%
+        filter(GeoUID %in% unique(train$GeoUID[is.na(train$tot_prod)])) %>%
+        mutate(mean_temp_high = unlist(mean_temp_high),
+               mean_pcp_high = unlist(mean_pcp_high),
+               mean_temp_low = unlist(mean_temp_low),
+               mean_pcp_low = unlist(mean_pcp_low)
+               )
+        
+
+      # Validation Rows
+      vs = sample(nrow(train), 0.1*nrow(train))
+
+      # Formula
+      form <- tot_prod ~ mean_temp_high + mean_pcp_high
+
+      # Fit
+      Bcartime(formula=form, data=train, scol= "s", tcol= "t",
+               W=weightmat_pe, model="ar", AR = 2, family="gaussian", package="CARBayesST",
+               validrows = vs,
+               N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
+
+    }
   )
+  
+  
 )
