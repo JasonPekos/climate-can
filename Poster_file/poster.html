@@ -22,6 +22,10 @@ Google fonts api stuff
 <title>Bayesian spatio-temporal modelling of overall economic productivity</title>
 
 
+<script src="poster_files/htmlwidgets-1.6.2/htmlwidgets.js"></script>
+<link href="poster_files/vis-9.1.0/vis-network.min.css" rel="stylesheet" />
+<script src="poster_files/vis-9.1.0/vis-network.min.js"></script>
+<script src="poster_files/visNetwork-binding-2.1.2/visNetwork.js"></script>
 
 
 
@@ -34,7 +38,7 @@ padding: 0;
 }
 body {
 margin: 0;
-font-size: 45px;
+font-size: 30pt;
 width: 72in;
 height: 48in;
 padding: 0;
@@ -321,8 +325,8 @@ a low emission and high emission scenario. This allows us to compare model predi
 <div id="historical-data-and-future-predictions" class="section level3">
 <h3>Historical Data and Future Predictions:</h3>
 <p>Historical data is provided as a single monthly trend of <code>1x1</code> degree spatial cells. At the time in which the CMIP5 model was computed — Jan 1st, 2006 — the output splits into two trends representing different climate scenarios, in the same format as the historical data.</p>
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-1"></span>
-<img src="poster_files/figure-html/unnamed-chunk-1-1.png" alt="CMIP5 Data" width="80%" />
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-2"></span>
+<img src="poster_files/figure-html/unnamed-chunk-2-1.png" alt="CMIP5 Data" width="80%" />
 <p class="caption">
 Figure 1: CMIP5 Data
 </p>
@@ -331,19 +335,34 @@ Figure 1: CMIP5 Data
 </div>
 <div id="productivity" class="section level2">
 <h2>Productivity</h2>
+<p>I should put a productivity thing here:</p>
+<p>One More line</p>
 </div>
+</div>
+<div id="results" class="section level1">
+<h1>Results</h1>
+<p>The Big Results Map Goes Here:</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-3"></span>
+<img src="poster_files/figure-html/unnamed-chunk-3-1.png" alt="Processing Data" width="80%" />
+<p class="caption">
+Figure 2: Processing Data
+</p>
+</div>
+</div>
+<div id="model" class="section level1">
+<h1>Model:</h1>
 </div>
 <div id="methods" class="section level1">
-<h1>Methods</h1>
+<h1>Methods:</h1>
 <div id="arial-unit-preprocessing" class="section level2">
 <h2>Arial Unit Preprocessing</h2>
 <p>Productivity is only available on the level of census regions — irregular polygons, or sets of polygons. Alternatively,
 CMIP5 climate data is available on the level of <code>1x1</code> degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data.</p>
 <p>It’s also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting.</p>
-<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-2"></span>
-<img src="poster_files/figure-html/unnamed-chunk-2-1.png" alt="Processing Data" width="80%" />
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-4"></span>
+<img src="poster_files/figure-html/unnamed-chunk-4-1.png" alt="Processing Data" width="80%" />
 <p class="caption">
-Figure 2: Processing Data
+Figure 3: Processing Data
 </p>
 </div>
 </div>
@@ -352,10 +371,74 @@ Figure 2: Processing Data
 <p>We leverage <code>targets</code> — a make-like utility in R — to build a reproducible scientific workflow for our modelling process.</p>
 <p>This allows us to easily swap out components of our modelling pipeline — for example, different climate models, different productivity data, or different predictive models — while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH.</p>
 <p>In the interest of reproducible science, everything related to this submission — including this poster itself, and all graphics and model output included inside — can be remade in a one-line R command:</p>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-6"></span>
+<div class="visNetwork html-widget html-fill-item-overflow-hidden html-fill-item" id="htmlwidget-34f3f8edd1e5980df843" style="width:80%;height:480px;"></div>
+<script type="application/json" data-for="htmlwidget-34f3f8edd1e5980df843">{"x":{"nodes":{"name":["ab_ts","bc_ts","cmip5_high_pcp","cmip5_high_sndpt","cmip5_high_temp","cmip5_low_pcp","cmip5_low_sndpt","cmip5_low_temp","cmip5_med_temp","download_cmip5_pcp","download_cmip5_pcp_url","download_cmip5_temp","download_cmip5_temp_url","download_hist_cmip5","download_hist_cmip5_url","mb_ts","mcmc_pars","mean_trends","model_comp_plots_pe","model_fit_nb","model_fit_pe","nb_ts","nl_ts","ns_ts","on_ts","pe_ts","poster","preds_nl","preds_pe","qc_ts","raw_cmip5_hist_pcp","raw_cmip5_hist_sndpt","raw_cmip5_hist_temp","raw_geom_data_ab","raw_geom_data_bc","raw_geom_data_mb","raw_geom_data_nb","raw_geom_data_nl","raw_geom_data_ns","raw_geom_data_nt","raw_geom_data_nu","raw_geom_data_on","raw_geom_data_pe","raw_geom_data_qc","raw_geom_data_sk","raw_geom_data_yt","raw_prod_data_ab","raw_prod_data_bc","raw_prod_data_mb","raw_prod_data_nb","raw_prod_data_nl","raw_prod_data_ns","raw_prod_data_on","raw_prod_data_pe","raw_prod_data_qc","raw_prod_data_sk","results_table_pe","sk_ts","weightmat_ab","weightmat_nb","weightmat_ns","weightmat_on","weightmat_pe","weightmat_qc","weightmat_sk","model_fit_ns","model_fit_on","results_table_on","model_fit_qc","model_fit_sk","results_table_sk","preds_qc","preds_sk","model_fit_ab","model_fit_bc","model_fit_mb","preds_ab","model_fit_nl","preds_mb","preds_nb","results_table_bc","preds_ns","preds_on","results_table_ab","results_table_ns","results_table_mb","weightmat_mb","results_table_nl","preds_bc","results_table_qc","results_table_nb","getmask_geouid","getmean_raster","create_neighborhood_matrix","getmean_geouid","modify_time_labels","create_neighbors_list","transform_df"],"type":["stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","stem","function","function","function","function","function","function","function"],"status":["uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","outdated","outdated","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","outdated","uptodate","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","outdated","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate","uptodate"],"seconds":[5175.58,7785.225,0.55,0.389,0.682,0.54,0.595,0.53,0.511,15.412,0,18.91,0,17.844,0,3222.109,1.777,0.244,0.039,406.668,98.309,3941.07,4748.25,1081.956,6815.684,1285.844,28.033,3.511,267.602,5771.318,0.665,0.552,0.593,0.181,0.668,0.132,0.137,0.353,0.208,0.304,2.097,0.441,0.07,0.576,0.201,0.059,2.055,2.261,0.943,1.842,1.292,0.541,2.593,0.391,5.666,3.418,0.001,8974.255,0.701,3.437,0.595,1.282,0.278,1.374,0.456,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"bytes":[10090820,13078572,54577983,43296635,45145791,54603087,43319767,45199932,45181729,71855928,0,71855556,0,79673064,0,5330088,115,6550,208767,1219997466,505515798,6235605,6531947,2327673,15892871,1781515,44077,0,2910954,28229255,28664787,17376952,23759220,408754,1781622,255287,253996,923464,384606,635392,5258633,1175469,72654,1455980,371339,42300,6850325,9022545,3751798,4660178,3869491,2021485,11294309,1415189,20498943,7545942,355,13666646,8277,5343,1136,10456,1736,0,23394,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"branches":[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"label":["ab_ts","bc_ts","cmip5_high_pcp","cmip5_high_sndpt","cmip5_high_temp","cmip5_low_pcp","cmip5_low_sndpt","cmip5_low_temp","cmip5_med_temp","download_cmip5_pcp","download_cmip5_pcp_url","download_cmip5_temp","download_cmip5_temp_url","download_hist_cmip5","download_hist_cmip5_url","mb_ts","mcmc_pars","mean_trends","model_comp_plots_pe","model_fit_nb","model_fit_pe","nb_ts","nl_ts","ns_ts","on_ts","pe_ts","poster","preds_nl","preds_pe","qc_ts","raw_cmip5_hist_pcp","raw_cmip5_hist_sndpt","raw_cmip5_hist_temp","raw_geom_data_ab","raw_geom_data_bc","raw_geom_data_mb","raw_geom_data_nb","raw_geom_data_nl","raw_geom_data_ns","raw_geom_data_nt","raw_geom_data_nu","raw_geom_data_on","raw_geom_data_pe","raw_geom_data_qc","raw_geom_data_sk","raw_geom_data_yt","raw_prod_data_ab","raw_prod_data_bc","raw_prod_data_mb","raw_prod_data_nb","raw_prod_data_nl","raw_prod_data_ns","raw_prod_data_on","raw_prod_data_pe","raw_prod_data_qc","raw_prod_data_sk","results_table_pe","sk_ts","weightmat_ab","weightmat_nb","weightmat_ns","weightmat_on","weightmat_pe","weightmat_qc","weightmat_sk","model_fit_ns","model_fit_on","results_table_on","model_fit_qc","model_fit_sk","results_table_sk","preds_qc","preds_sk","model_fit_ab","model_fit_bc","model_fit_mb","preds_ab","model_fit_nl","preds_mb","preds_nb","results_table_bc","preds_ns","preds_on","results_table_ab","results_table_ns","results_table_mb","weightmat_mb","results_table_nl","preds_bc","results_table_qc","results_table_nb","getmask_geouid","getmean_raster","create_neighborhood_matrix","getmean_geouid","modify_time_labels","create_neighbors_list","transform_df"],"color":["#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#78B7C5","#78B7C5","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#354823","#78B7C5","#354823","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#78B7C5","#354823","#354823","#354823","#354823","#354823","#354823","#354823"],"id":["ab_ts","bc_ts","cmip5_high_pcp","cmip5_high_sndpt","cmip5_high_temp","cmip5_low_pcp","cmip5_low_sndpt","cmip5_low_temp","cmip5_med_temp","download_cmip5_pcp","download_cmip5_pcp_url","download_cmip5_temp","download_cmip5_temp_url","download_hist_cmip5","download_hist_cmip5_url","mb_ts","mcmc_pars","mean_trends","model_comp_plots_pe","model_fit_nb","model_fit_pe","nb_ts","nl_ts","ns_ts","on_ts","pe_ts","poster","preds_nl","preds_pe","qc_ts","raw_cmip5_hist_pcp","raw_cmip5_hist_sndpt","raw_cmip5_hist_temp","raw_geom_data_ab","raw_geom_data_bc","raw_geom_data_mb","raw_geom_data_nb","raw_geom_data_nl","raw_geom_data_ns","raw_geom_data_nt","raw_geom_data_nu","raw_geom_data_on","raw_geom_data_pe","raw_geom_data_qc","raw_geom_data_sk","raw_geom_data_yt","raw_prod_data_ab","raw_prod_data_bc","raw_prod_data_mb","raw_prod_data_nb","raw_prod_data_nl","raw_prod_data_ns","raw_prod_data_on","raw_prod_data_pe","raw_prod_data_qc","raw_prod_data_sk","results_table_pe","sk_ts","weightmat_ab","weightmat_nb","weightmat_ns","weightmat_on","weightmat_pe","weightmat_qc","weightmat_sk","model_fit_ns","model_fit_on","results_table_on","model_fit_qc","model_fit_sk","results_table_sk","preds_qc","preds_sk","model_fit_ab","model_fit_bc","model_fit_mb","preds_ab","model_fit_nl","preds_mb","preds_nb","results_table_bc","preds_ns","preds_on","results_table_ab","results_table_ns","results_table_mb","weightmat_mb","results_table_nl","preds_bc","results_table_qc","results_table_nb","getmask_geouid","getmean_raster","create_neighborhood_matrix","getmean_geouid","modify_time_labels","create_neighbors_list","transform_df"],"level":[5,5,4,4,4,4,4,4,4,2,1,2,1,2,1,5,1,5,9,7,7,5,5,5,5,5,10,6,7,5,3,3,3,4,4,4,4,4,4,4,4,4,4,4,4,4,1,1,1,1,1,1,1,1,1,1,8,5,6,6,6,6,6,6,6,7,7,8,7,7,8,7,7,7,6,7,7,6,7,7,7,7,7,8,8,8,6,7,6,8,8,1,1,1,1,1,1,2],"shape":["dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","dot","triangle","triangle","triangle","triangle","triangle","triangle","triangle"]},"edges":{"from":["getmask_geouid","getmean_geouid","create_neighborhood_matrix","create_neighbors_list","nb_ts","raw_geom_data_nb","raw_cmip5_hist_temp","raw_cmip5_hist_temp","ab_ts","mcmc_pars","weightmat_ab","raw_cmip5_hist_temp","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_ns","raw_prod_data_ns","transform_df","raw_cmip5_hist_temp","bc_ts","mcmc_pars","download_cmip5_temp","modify_time_labels","raw_cmip5_hist_temp","create_neighborhood_matrix","create_neighbors_list","mb_ts","raw_geom_data_mb","create_neighborhood_matrix","create_neighbors_list","qc_ts","raw_geom_data_qc","download_cmip5_temp","modify_time_labels","raw_cmip5_hist_temp","download_hist_cmip5","modify_time_labels","mcmc_pars","pe_ts","weightmat_pe","model_fit_sk","ab_ts","create_neighborhood_matrix","create_neighbors_list","raw_geom_data_ab","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_pe","raw_prod_data_pe","transform_df","download_cmip5_temp_url","mcmc_pars","sk_ts","weightmat_sk","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_mb","raw_prod_data_mb","transform_df","download_cmip5_pcp_url","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_ab","raw_prod_data_ab","transform_df","mcmc_pars","qc_ts","weightmat_qc","cmip5_high_temp","mean_trends","model_comp_plots_pe","on_ts","raw_geom_data_on","results_table_pe","create_neighborhood_matrix","create_neighbors_list","pe_ts","raw_geom_data_pe","download_cmip5_temp","modify_time_labels","raw_cmip5_hist_temp","cmip5_high_temp","cmip5_low_temp","getmean_raster","raw_cmip5_hist_temp","results_table_pe","mcmc_pars","nb_ts","weightmat_nb","model_fit_mb","mcmc_pars","ns_ts","weightmat_ns","raw_cmip5_hist_temp","mcmc_pars","nl_ts","download_hist_cmip5","modify_time_labels","download_cmip5_pcp","modify_time_labels","raw_cmip5_hist_sndpt","download_hist_cmip5","modify_time_labels","mcmc_pars","ns_ts","weightmat_ns","mcmc_pars","qc_ts","weightmat_qc","mcmc_pars","on_ts","weightmat_on","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_bc","raw_prod_data_bc","transform_df","model_fit_nb","download_hist_cmip5_url","download_cmip5_pcp","modify_time_labels","raw_cmip5_hist_pcp","raw_cmip5_hist_temp","mcmc_pars","nb_ts","weightmat_nb","raw_cmip5_hist_temp","mcmc_pars","on_ts","weightmat_on","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_nb","raw_prod_data_nb","transform_df","raw_cmip5_hist_temp","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_nl","raw_prod_data_nl","transform_df","mcmc_pars","sk_ts","weightmat_sk","mb_ts","mcmc_pars","weightmat_mb","bc_ts","mcmc_pars","model_fit_pe","model_fit_nl","mcmc_pars","nl_ts","model_fit_ab","mcmc_pars","pe_ts","weightmat_pe","model_fit_ns","raw_cmip5_hist_temp","mb_ts","mcmc_pars","weightmat_mb","raw_cmip5_hist_temp","create_neighborhood_matrix","create_neighbors_list","ns_ts","raw_geom_data_ns","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_qc","raw_prod_data_qc","transform_df","model_fit_qc","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_sk","raw_prod_data_sk","transform_df","model_fit_on","download_cmip5_pcp","modify_time_labels","raw_cmip5_hist_sndpt","model_fit_bc","raw_cmip5_hist_temp","ab_ts","mcmc_pars","weightmat_ab","cmip5_high_pcp","cmip5_high_temp","cmip5_low_pcp","cmip5_low_temp","raw_geom_data_on","raw_prod_data_on","transform_df","download_cmip5_pcp","modify_time_labels","raw_cmip5_hist_pcp","create_neighborhood_matrix","create_neighbors_list","on_ts","raw_geom_data_on","create_neighborhood_matrix","create_neighbors_list","raw_geom_data_sk","sk_ts","raw_cmip5_hist_temp","raw_cmip5_hist_temp"],"to":["transform_df","transform_df","weightmat_nb","weightmat_nb","weightmat_nb","weightmat_nb","raw_geom_data_ns","raw_geom_data_nt","model_fit_ab","model_fit_ab","model_fit_ab","raw_geom_data_nu","ns_ts","ns_ts","ns_ts","ns_ts","ns_ts","ns_ts","ns_ts","raw_geom_data_on","preds_bc","preds_bc","cmip5_low_temp","cmip5_low_temp","cmip5_low_temp","weightmat_mb","weightmat_mb","weightmat_mb","weightmat_mb","weightmat_qc","weightmat_qc","weightmat_qc","weightmat_qc","cmip5_high_temp","cmip5_high_temp","cmip5_high_temp","raw_cmip5_hist_sndpt","raw_cmip5_hist_sndpt","model_fit_pe","model_fit_pe","model_fit_pe","results_table_sk","weightmat_ab","weightmat_ab","weightmat_ab","weightmat_ab","pe_ts","pe_ts","pe_ts","pe_ts","pe_ts","pe_ts","pe_ts","download_cmip5_temp","model_fit_sk","model_fit_sk","model_fit_sk","mb_ts","mb_ts","mb_ts","mb_ts","mb_ts","mb_ts","mb_ts","download_cmip5_pcp","ab_ts","ab_ts","ab_ts","ab_ts","ab_ts","ab_ts","ab_ts","model_fit_qc","model_fit_qc","model_fit_qc","poster","poster","poster","poster","poster","poster","weightmat_pe","weightmat_pe","weightmat_pe","weightmat_pe","cmip5_med_temp","cmip5_med_temp","cmip5_med_temp","mean_trends","mean_trends","mean_trends","mean_trends","model_comp_plots_pe","model_fit_nb","model_fit_nb","model_fit_nb","results_table_mb","preds_ns","preds_ns","preds_ns","raw_geom_data_pe","model_fit_nl","model_fit_nl","raw_cmip5_hist_pcp","raw_cmip5_hist_pcp","cmip5_high_sndpt","cmip5_high_sndpt","cmip5_high_sndpt","raw_cmip5_hist_temp","raw_cmip5_hist_temp","model_fit_ns","model_fit_ns","model_fit_ns","preds_qc","preds_qc","preds_qc","preds_on","preds_on","preds_on","bc_ts","bc_ts","bc_ts","bc_ts","bc_ts","bc_ts","bc_ts","results_table_nb","download_hist_cmip5","cmip5_high_pcp","cmip5_high_pcp","cmip5_high_pcp","raw_geom_data_qc","preds_nb","preds_nb","preds_nb","raw_geom_data_mb","model_fit_on","model_fit_on","model_fit_on","nb_ts","nb_ts","nb_ts","nb_ts","nb_ts","nb_ts","nb_ts","raw_geom_data_sk","nl_ts","nl_ts","nl_ts","nl_ts","nl_ts","nl_ts","nl_ts","preds_sk","preds_sk","preds_sk","model_fit_mb","model_fit_mb","model_fit_mb","model_fit_bc","model_fit_bc","results_table_pe","results_table_nl","preds_nl","preds_nl","results_table_ab","preds_pe","preds_pe","preds_pe","results_table_ns","raw_geom_data_bc","preds_mb","preds_mb","preds_mb","raw_geom_data_nb","weightmat_ns","weightmat_ns","weightmat_ns","weightmat_ns","qc_ts","qc_ts","qc_ts","qc_ts","qc_ts","qc_ts","qc_ts","results_table_qc","sk_ts","sk_ts","sk_ts","sk_ts","sk_ts","sk_ts","sk_ts","results_table_on","cmip5_low_sndpt","cmip5_low_sndpt","cmip5_low_sndpt","results_table_bc","raw_geom_data_nl","preds_ab","preds_ab","preds_ab","on_ts","on_ts","on_ts","on_ts","on_ts","on_ts","on_ts","cmip5_low_pcp","cmip5_low_pcp","cmip5_low_pcp","weightmat_on","weightmat_on","weightmat_on","weightmat_on","weightmat_sk","weightmat_sk","weightmat_sk","weightmat_sk","raw_geom_data_ab","raw_geom_data_yt"],"arrows":["to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to","to"]},"nodesToDataframe":true,"edgesToDataframe":true,"options":{"width":"100%","height":"100%","nodes":{"shape":"dot","physics":false},"manipulation":{"enabled":false},"edges":{"smooth":{"type":"cubicBezier","forceDirection":"horizontal"}},"physics":{"stabilization":false},"interaction":{"zoomSpeed":1},"layout":{"hierarchical":{"enabled":true,"direction":"LR"}}},"groups":null,"width":null,"height":null,"idselection":{"enabled":false,"style":"width: 150px; height: 26px","useLabels":true,"main":"Select by id"},"byselection":{"enabled":false,"style":"width: 150px; height: 26px","multiple":false,"hideColor":"rgba(200,200,200,0.5)","highlight":false},"main":{"text":"","style":"font-family:Georgia, Times New Roman, Times, serif;font-weight:bold;font-size:20px;text-align:center;"},"submain":null,"footer":null,"background":"rgba(0, 0, 0, 0)","highlight":{"enabled":true,"hoverNearest":false,"degree":{"from":1,"to":1},"algorithm":"hierarchical","hideColor":"rgba(200,200,200,0.5)","labelOnly":true},"collapse":{"enabled":true,"fit":false,"resetHighlight":true,"clusterOptions":null,"keepCoord":true,"labelSuffix":"(cluster)"},"legend":{"width":0.2,"useGroups":false,"position":"right","ncol":1,"stepX":100,"stepY":100,"zoom":true,"nodes":{"label":["Up to date","Outdated","Stem","Function"],"color":["#354823","#78B7C5","#899DA4","#899DA4"],"shape":["dot","dot","dot","triangle"]},"nodesToDataframe":true},"tooltipStay":300,"tooltipStyle":"position: fixed;visibility:hidden;padding: 5px;white-space: nowrap;font-family: verdana;font-size:14px;font-color:#000000;background-color: #f5f4ed;-moz-border-radius: 3px;-webkit-border-radius: 3px;border-radius: 3px;border: 1px solid #808074;box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.2);"},"evals":[],"jsHooks":[]}</script>
+<p class="caption">
+Figure 4: Network Viz
+</p>
 </div>
 </div>
-<div id="results" class="section level1">
-<h1>Results</h1>
+</div>
+<div id="diagnostics-and-model-selection" class="section level1">
+<h1>Diagnostics and Model Selection</h1>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">DIC</th>
+<th align="right">WAIC</th>
+<th align="right">RMSE</th>
+<th align="right">MAE</th>
+<th align="right">CRPS</th>
+<th align="right">CVG</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Linear</td>
+<td align="right">75586.63</td>
+<td align="right">75619.00</td>
+<td align="right">6.643667</td>
+<td align="right">2.4222188</td>
+<td align="right">4.719416</td>
+<td align="right">97.74624</td>
+</tr>
+<tr class="even">
+<td align="left">ANOVA</td>
+<td align="right">60754.78</td>
+<td align="right">60842.16</td>
+<td align="right">2.686172</td>
+<td align="right">0.8382559</td>
+<td align="right">2.266697</td>
+<td align="right">97.16194</td>
+</tr>
+<tr class="odd">
+<td align="left">AR(1)</td>
+<td align="right">17874.93</td>
+<td align="right">15086.67</td>
+<td align="right">2.630703</td>
+<td align="right">0.9414808</td>
+<td align="right">1.905766</td>
+<td align="right">98.83139</td>
+</tr>
+<tr class="even">
+<td align="left">AR(2)</td>
+<td align="right">15148.55</td>
+<td align="right">12332.64</td>
+<td align="right">2.359195</td>
+<td align="right">0.8795180</td>
+<td align="right">1.636624</td>
+<td align="right">98.16361</td>
+</tr>
+</tbody>
+</table>
+<div class="figure" style="text-align: center"><span style="display:block;" id="fig:unnamed-chunk-8"></span>
+<img src="poster_files/figure-html/unnamed-chunk-8-1.png" alt="Network Viz" width="80%" />
+<p class="caption">
+Figure 5: Network Viz
+</p>
+</div>
 </div>
 <div id="references" class="section level1">
 <h1>References</h1>

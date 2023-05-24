@@ -1639,6 +1639,39 @@ list(
     }
   ),
   #' PRODUCTIVITY PLOTS
+  tar_target(
+    name = model_comp_plots_pe,
+    command = {
+      # Assume the tibble name is df
+      df <- as_tibble(results_table_pe)
+      
+      # Add model names to your tibble
+      df$model <- c("Linear", "ANOVA", "AR(1)", "AR(2)")
+      
+      # Reshape the data into a long format
+      df_long <- df %>%
+        tidyr::pivot_longer(cols = -model, names_to = "metric", values_to = "value")
+      
+      plots <- purrr::map(unique(df_long$metric), ~{
+        
+        # Subset the data for this metric
+        df_subset <- df_long[df_long$metric == .x, ]
+        
+        # Plot this subset
+        p <- ggplot(df_subset, aes(x = model, y = value, fill = value)) +
+          geom_bar(stat = "identity", position = "dodge") +
+          scale_fill_gradient(low = "blue", high = "red") +
+          theme_minimal() +
+          labs(x = "Model", y = "Value", title = .x) +
+          theme(axis.text.x = element_text(angle = 46, hjust = 1)) +
+          theme(legend.position="none")
+        
+        return(p)
+      })
+      
+      out <- plots[[1]] | plots[[2]] | plots[[3]] | plots[[4]] | plots[[5]] | plots[[6]]
+    }
+  ),
   
   
   tar_render(name = poster,

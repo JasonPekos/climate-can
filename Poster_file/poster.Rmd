@@ -22,6 +22,7 @@ secondary_colour: "#5E6A71"
 accent_colour: "#FDBF57"
 poster_height: "48in"
 poster_width: "72in"
+body_textsize: "30pt"
 ---
 
 ```{r setup, include=FALSE}
@@ -30,88 +31,11 @@ library(targets)
 library(ggplot2)
 ```
 
-# Background
 
-In an atmosphere of increased concern around anthropogenic climate change, questions naturally arise about the impact of our changing climate on industrial productivity.
-
-Climate change manifests not only as increases in global mean temperature; high emissions scenarios also correspond with increased variability in climate events, as well as differing precipitation patterns.
-
-To examine the impact of these changes, we model productivity as a function of relevant climate variables in both a low emission and high emission scenario. This allows us to compare model predictions across scenarios holding all else constant, naturally removing secular and seasonal trends in productivity at any given time-point.
-
-## Objectives
-
-1.  Fit a variety of model forms to historical climate and productivity data, performing model selection via WAIC and DIC.
-
-2.  Use the posterior predictive distributions from the best-performing model(s) to forecast future productivity in response to CMIP5 climate predictions.
-
-3.  Build a reproducible workflow with the ability to use most modern pre-baked climate models as drop-in replacements for the standard Canadian CMIP5 ensemble. We also maintain flexibility around the specific form of the Bayesian GLM used, allowing further extensions with regards to spatial hierarchy and temporal dependence. This workflow also allows for the use of accelerated computing via the ComputeCanada clusters, with data and worker transfer handled automatically, ensuring that all work can be done from a local machine.
-
-# Exploratory Analysis of Relevant Data
-
-## Climate
-
-We chose to use the CMIP5 ensemble data over the other two relevant options: **(1)** building a custom smooth over provided weather station data, or **(2)** using a more modern climate model, e.g. a CMIP6 ensemble. The decision to use CMIP5 over CMIP6 comes down purely to data availability --- the government of Canada has not yet made it's CMIP6 ensemble available for bulk download. Recognizing that the practical utility of a project like this requires modern data, we built this project to allow such data to be used as a drop-in replacement at whatever time it becomes publicly available.
-
-The decision to not build a custom model over data from the provided weather stations came out of a recognition that such model would necessarily perform poorly, as it could not possibly take into account relevant geological factors --- e.g. mountain ranges, weather patterns, and water coverage (lakes and oceans). Using climate model data also allows us to compute the posterior predictive distribution at future time-points, something not possible with only historical weather data.
-
-### Historical Data and Future Predictions:
-
-Historical data is provided as a single monthly trend of `1x1` degree spatial cells. At the time in which the CMIP5 model was computed --- Jan 1st, 2006 --- the output splits into two trends representing different climate scenarios, in the same format as the historical data.
-
-```{r, out.width='80%', fig.align='center', fig.cap='CMIP5 Data', fig.height=5}
+```{r, include=FALSE}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
-
-
-
-library(targets)
-
-
-# Compute historical trend over all cells:
-
-means <- tar_read(mean_trends) 
-
-i1 <- length(means$hist$mean)
-i2 <- length(means$high$mean)
-
-# Plot
-p1 <- ggplot() +
-  geom_line(aes(x = 1:i1, y = means$hist$mean), color = "blue") + 
-  geom_line(aes(x = (i1+1):(i1+i2), y = means$low$mean), color = "green", linetype = "twodash") + 
-  geom_line(aes(x = (i1+1):(i1+i2), y = means$high$mean), color = "red", linetype = "twodash") + 
-  theme_bw() + 
-  xlab("Days Since 1999") +
-  ylab("Average Temperature — Canada") + 
-  ggtitle("Relationship Between Different Climate Scenarios")
-
-
-p2 <- ggplot() +
-  geom_line(aes(x = (i1+1):(i1+i2), y = (means$high$mean - means$low$mean)), color = "green", linetype = "twodash") + 
-  theme_bw() + 
-  xlab("Days Since 1999") +
-  ylab("Differenced Avg — Scenarios") + 
-  ggtitle("Different Climate Scenarios Predict Different Outcomes")
-  
-
- p1 / p2
-```
-
-## Productivity
-
-# Methods
-
-## Arial Unit Preprocessing
-
-Productivity is only available on the level of census regions --- irregular polygons, or sets of polygons. Alternatively, CMIP5 climate data is available on the level of `1x1` degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data.
-
-It's also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting.
-
-```{r, out.width='80%', fig.align='center', fig.cap='Processing Data', fig.height=5}
-#| echo: FALSE
-#| message: FALSE
-#| warning: FALSE
-
 
 
 prod <- tar_read(on_ts)
@@ -159,26 +83,178 @@ parsed <- ggplot() +
   theme_void() + 
   theme(legend.position = "none")   
 
-preparsed + parsed
 
 
 ```
 
-## Automatic Workflow
+# Background
 
-We leverage `targets` --- a make-like utility in R --- to build a reproducible scientific workflow for our modelling process.
 
-This allows us to easily swap out components of our modelling pipeline --- for example, different climate models, different productivity data, or different predictive models --- while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH.
+In an atmosphere of increased concern around anthropogenic climate change, questions naturally arise about the impact of 
+our changing climate on industrial productivity.
 
-In the interest of reproducible science, everything related to this submission --- including this poster itself, and all graphics and model output included inside --- can be remade in a one-line R command:
+Climate change manifests not only as increases in global mean temperature;
+high emissions scenarios also correspond with increased variability in climate events, as
+well as differing precipitation patterns. 
+
+To examine the impact of these changes, we model productivity as a function of relevant climate variables in both 
+a low emission and high emission scenario. This allows us to compare model predictions across scenarios holding all else constant, naturally removing secular and seasonal trends in productivity at any given time-point. 
+
+
+## Objectives
+
+1. Fit a variety of model forms to historical climate and productivity data, performing model selection via WAIC and DIC. 
+
+2. Use the posterior predictive distributions from the best-performing model(s) to forecast future productivity in response to CMIP5 climate predictions. 
+
+3. Build a reproducible workflow with the ability to use most modern pre-baked climate models as drop-in replacements for the standard Canadian CMIP5 ensemble. We also maintain flexibility around the specific form of the Bayesian GLM used, allowing further extensions with regards to spatial hierarchy and temporal dependence. This workflow also allows for the use of accelerated computing via the ComputeCanada clusters, with data and worker transfer handled automatically, ensuring that all work can be done from a local machine. 
+
+# Exploratory Analysis of Relevant Data
+
+## Climate
+
+We chose to use the CMIP5 ensemble data over the other two relevant options: **(1)** building a custom smooth over provided weather station data, or **(2)** using a more modern climate model, e.g. a CMIP6 ensemble. The decision to use CMIP5 over CMIP6 comes down purely to data availability --- the government of Canada has not yet made it's CMIP6 ensemble available for bulk download. Recognizing that the practical utility of a project like this requires modern data, we built this project to allow such data to be used as a drop-in replacement at whatever time it becomes publicly available. 
+
+The decision to not build a custom model over data from the provided weather stations came out of a recognition that such model would necessarily perform poorly, as it could not possibly take into account relevant geological factors --- e.g. mountain ranges, weather patterns, and water coverage (lakes and oceans). Using climate model data also allows us to compute the posterior predictive distribution at future time-points, something not possible with only historical weather data. 
+
+### Historical Data and Future Predictions:
+
+Historical data is provided as a single monthly trend of `1x1` degree spatial cells. At the time in which the CMIP5 model was computed --- Jan 1st, 2006 --- the output splits into two trends representing different climate scenarios, in the same format as the historical data. 
+
+```{r, out.width='80%', fig.align='center', fig.cap='CMIP5 Data', fig.height=3.5}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+
+
+library(targets)
+
+
+# Compute historical trend over all cells:
+
+means <- tar_read(mean_trends) 
+
+i1 <- length(means$hist$mean)
+i2 <- length(means$high$mean)
+
+# Plot
+p1 <- ggplot() +
+  geom_line(aes(x = 1:i1, y = means$hist$mean), color = "blue") + 
+  geom_line(aes(x = (i1+1):(i1+i2), y = means$low$mean), color = "green", linetype = "twodash") + 
+  geom_line(aes(x = (i1+1):(i1+i2), y = means$high$mean), color = "red", linetype = "twodash") + 
+  theme_bw() + 
+  xlab("Days Since 1999") +
+  ylab("Temp - C") + 
+  ggtitle("Relationship Between Different Climate Scenarios")
+
+
+p2 <- ggplot() +
+  geom_line(aes(x = (i1+1):(i1+i2), y = (means$high$mean - means$low$mean)), color = "green", linetype = "twodash") + 
+  theme_bw() + 
+  xlab("Days Since 1999") +
+  ylab("Differenced Avg — Scenarios") + 
+  ggtitle("Different Climate Scenarios Predict Different Outcomes")
+  
+
+ p1 / p2 
+```
+
+
+## Productivity
+
+I should put a productivity thing here:
+
+One More line
+
+
+
+# Results
+
+The Big Results Map Goes Here:
+
 
 ```{r, out.width='80%', fig.align='center', fig.cap='Processing Data', fig.height=5}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
 
+preparsed
+
 ```
 
-# Results
+
+# Model:
+
+
+# Methods:
+
+## Arial Unit Preprocessing 
+
+Productivity is only available on the level of census regions --- irregular polygons, or sets of polygons. Alternatively, 
+CMIP5 climate data is available on the level of `1x1` degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data. 
+
+It's also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting. 
+
+
+```{r, out.width='80%', fig.align='center', fig.cap='Processing Data', fig.height=3}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+
+preparsed + parsed #comment
+```
+
+
+## Automatic Workflow
+
+We leverage `targets` --- a make-like utility in R --- to build a reproducible scientific workflow for our modelling process. 
+
+
+This allows us to easily swap out components of our modelling pipeline --- for example, different climate models, different productivity data, or different predictive models --- while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH. 
+
+In the interest of reproducible science, everything related to this submission --- including this poster itself, and all graphics and model output included inside --- can be remade in a one-line R command: 
+
+```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=5, message=FALSE, warning=FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+#| results: hide
+
+
+q <- tar_visnetwork(exclude = c("tidy_climate", ".Random.seed", "tidy_geom", "geom_region_plot", "find_enclosing_polydat", "add_enclosing_polydat", "find_enclosing_polygon", "download_cmip5_sndpt_url", "download_cmip5_sndpt"))
+```
+
+```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=5, message=FALSE, warning=FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+q 
+```
+
+
+
+# Diagnostics and Model Selection
+
+  
+```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=5, message=FALSE, warning=FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+knitr::kable(tar_read(results_table_pe))
+```
+
+```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=2, message=FALSE, warning=FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+
+tar_read(model_comp_plots_pe)
+```
+
+
 
 # References
