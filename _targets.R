@@ -1,6 +1,6 @@
 # Load packages required to define the pipeline:
 library(targets)
-library(tarchetypes) # Tar Quarto etc.
+p
 
 
 # Set target options:
@@ -26,7 +26,7 @@ options(clustermq.scheduler = "multicore")
 
 # options(
 #   clustermq.scheduler = "ssh",
-#   clustermq.ssh.host = "pekos@graham.computecanada.ca" # Change this
+#   clustermq.ssh.host = "abhiroop@graham.computecanada.ca" # Change this
 # )
 
 tar_source()
@@ -1639,8 +1639,10 @@ list(
       pred
     }
   ),
+  #' PRODUCTIVITY PLOTS
   
-  tar_render(name = poster,
-             "Poster_file/poster.rmd"
-  )
+  
+  #tar_render(name = poster,
+  #          "Poster_file/poster.rmd"
+ #)
 )
