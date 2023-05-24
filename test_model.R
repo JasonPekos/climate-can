@@ -59,6 +59,17 @@ plot(raw_geom_data_pe, col='gray', border='blue')
 xy <- coordinates(raw_geom_data_pe)
 plot(wr_pe, xy, col='red', lwd=2, add=TRUE)
 
+library(ggplot2)
+library(bmstdr)
+p_pe_1 <- pe_ts_full %>%
+  filter(Date == "2001-01-01")
+p_pe_1 <- cbind(p_pe_1, xy)
+
+ggplot2::ggplot(p_pe_1, aes(x=1, y=2, fill=tot_prod)) +
+  scale_fill_gradientn(colours=colpalette, na.value="black") +
+  geom_polygon(colour='black',size=0.25) +
+  geom_polygon(data = p_pe_1, aes(x=1, y=2, fill=tot_prod), colour='black',size=0.6) +
+  coord_equal()
 
 #' Modelling productivity (Y) in PEI (by each industry)
 #' Base model: Bayesian GLM with Normal distribution for Y_{it}
@@ -222,5 +233,34 @@ M_pe_tot <- Bcartime(formula=f_pe_tot, data=p_pe, scol= "GeoUID", tcol="Date",
                     N=Ncar, burn.in=burn.in.car, thin=thin)
 
 ## Use M_pe_tot to get the predictions
+
+# Compute historical trend over all cells:
+
+means <- tar_read(mean_trends) 
+
+i1 <- length(means$hist$mean)
+i2 <- length(means$high$mean)
+
+# Plot
+p1 <- ggplot() +
+  geom_line(aes(x = 1:i1, y = means$hist$mean), color = "blue") + 
+  geom_line(aes(x = (i1+1):(i1+i2), y = means$low$mean), color = "green", linetype = "twodash") + 
+  geom_line(aes(x = (i1+1):(i1+i2), y = means$high$mean), color = "red", linetype = "twodash") + 
+  theme_bw() + 
+  xlab("Days Since 1999") +
+  ylab("Average Temperature — Canada") + 
+  ggtitle("Relationship Between Different Climate Scenarios")
+
+
+p2 <- ggplot() +
+  geom_line(aes(x = (i1+1):(i1+i2), y = (means$high$mean - means$low$mean)), color = "green", linetype = "twodash") + 
+  theme_bw() + 
+  xlab("Days Since 1999") +
+  ylab("Differenced Avg — Scenarios") + 
+  ggtitle("Different Climate Scenarios Predict Different Outcomes")
+
+
+p1 / p2
+
 
 

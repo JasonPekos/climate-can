@@ -1642,6 +1642,6 @@ list(
   
   
   tar_render(name = poster,
-             "Poster_file/poster.rmd"
+            "Poster_file/poster.rmd"
   )
 )

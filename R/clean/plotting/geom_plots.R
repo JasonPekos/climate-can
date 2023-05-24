@@ -32,3 +32,6 @@ geom_region_plot <- function(tidyclimate, tidygeo, region_names) {
 
     return(p)
 }
+
+  
+  
