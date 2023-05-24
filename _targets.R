@@ -1,7 +1,6 @@
 # Load packages required to define the pipeline:
 library(targets)
-p
-
+library(tarchetypes) # Tar Quarto etc.
 
 # Set target options:
 tar_option_set(
@@ -1642,7 +1641,7 @@ list(
   #' PRODUCTIVITY PLOTS
   
   
-  #tar_render(name = poster,
-  #          "Poster_file/poster.rmd"
- #)
+  tar_render(name = poster,
+             "Poster_file/poster.rmd"
+  )
 )
