@@ -910,7 +910,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #2. NS
@@ -938,7 +938,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #3. NB
@@ -966,7 +966,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #4. AB
@@ -994,7 +994,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #5. SK
@@ -1022,7 +1022,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #6. MB
@@ -1050,7 +1050,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #7. ON
@@ -1078,7 +1078,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #8. QC
@@ -1106,7 +1106,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #9. BC
@@ -1134,7 +1134,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   #10. NL
@@ -1162,7 +1162,7 @@ list(
                a <- cbind(a, b.rmse, b.mae, b.crps, b.cvg)
                rownames(a) <- c("Linear", "ANOVA",  "AR(1)", "AR(2)")
                colnames(a) <- c("DIC", "WAIC", "RMSE", "MAE", "CRPS", "CVG") 
-               a
+               round(a,2)
              }
   ),
   # Model Preds for high and low emmission
