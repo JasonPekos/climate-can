@@ -1,4 +1,3 @@
-## PEI diff plot
 library(targets)
 library(profvis)
 library(terra)
@@ -8,168 +7,145 @@ library(ggplot2)
 library(tidyterra)
 library(patchwork)
 library(sf)
+library(imputeTS)
+library(spdep)
+library(lubridate)
+library(ggpubr)
+library(animation)
+##########
 ## MONTHLY
+##########
+## PEI diff plot
+## Yearly
+prod <- tar_read(preds_pe) %>%
+  mutate(Year = year(Date)) %>%
+  select(GeoUID, s, tot_prod, pred_h, pred_l, Year)
 
-#' Fucntion to make diff plots
-#' Inputs: preds_prov, geojson filename, Date (as character with YYYY-MM-01)
-#' Output: Plot diff of prod for given month, year
-diff_plot <- function(preds_prov, raw_geom_data_prov, Date){
+census <- tar_read(raw_geom_data_pe)
+year_of_interest <- 2008  # replace with your desired date
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_sub <- prod %>%
+  filter(Year == year_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) %>%
+  select(GeoUID, s, tot_prod, pred_h, pred_l, Year)
+
+avg_prod <- prod_sub %>%
+  group_by(GeoUID) %>%
+  summarise(true_avg_sp_prod = mean(tot_prod, na.rm = TRUE),
+            pred_h_avg_sp_prod = mean(pred_h, na.rm = TRUE),
+            pred_l_avg_sp_prod = mean(pred_l, na.rm = TRUE))
+
+
+# Join the spatial data with the temperature data
+pe_sf <- left_join(census, avg_prod, by = "GeoUID")
+
+#limits of PEI
+lim_pe_true = range(pe_sf$true_avg_sp_prod, na.rm = T)
+lim_pe_pred = range(pe_sf$pred_h_avg_sp_prod, na.rm = T)
+
+lim = c(0, max(lim_pe_true[2], lim_pe_pred[2]))
   
-  prod <- tar_read(preds_prov)
-  census <- tar_read(geom_data_prov)
-  time_of_interest <- as.Date(Date)  # replace with your desired date
-  rastc <- unwrap(tar_read(cmip5_high_temp))
+##PE TRUE
+plot_true_prod_pe <- ggplot() +
+  geom_sf(data = pe_sf, aes(fill = true_avg_sp_prod), color ="black") +
+  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
+  theme_minimal() +
+  labs(fill = "Tot Prod", title = paste("True Overall Productivity at", year_of_interest)) +
+  theme_void()
+
+##PE PRED
+plot_pred_prod_pe <- ggplot() +
+  geom_sf(data = pe_sf, aes(fill = pred_h_avg_sp_prod), color ="black") +
+  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
+  theme_minimal() +
+  labs(fill = "Tot Prod", title = paste("Predicted Overall Productivity at", year_of_interest)) +
+  theme_void()
+
+
+ggarrange(plot_true_prod_pe, plot_pred_prod_pe,  common.legend = TRUE)
+
+
+## ANIMATION with Year ##
+prod <- tar_read(preds_pe) %>%
+  mutate(Year = year(Date)) %>%
+  select(GeoUID, Date, s, t, tot_prod, pred_h, pred_l, Year)
+
+census <- tar_read(raw_geom_data_pe)
+
+#Set limits
+lim = c(min(prod$tot_prod, na.rm = TRUE), max(prod$tot_prod, na.rm = TRUE))
+
+Preds_year <- function(time) {
   
-  prod_subset <- prod %>%
-    filter(Date == time_of_interest) %>%
-    mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+    prod_sub <- prod %>%
+    filter(t == time) %>%
+    mutate(GeoUID = as.character(GeoUID)) %>%
+    select(Date, GeoUID, t, s, tot_prod, pred_h, pred_l, Year)
+  
+    yr = unique(prod_sub$Date)
+      
+    avg_prod <- prod_sub %>%
+    group_by(GeoUID) %>%
+    summarise(true_avg_sp_prod = mean(tot_prod, na.rm = TRUE),
+              pred_h_avg_sp_prod = mean(pred_h, na.rm = TRUE),
+              pred_l_avg_sp_prod = mean(pred_l, na.rm = TRUE))
+  
   
   # Join the spatial data with the temperature data
-  census_sf <- left_join(census, prod_subset, by = "GeoUID")
+  pe_sf <- left_join(census, avg_prod, by = "GeoUID")
   
-  lim = range(prod_subset$diff, na.rm = T)
-  # Plot
-  p = ggplot() +
-    geom_sf(data = census_sf, aes(fill = diff), color ="black") +
+  ##PE TRUE
+  plot_true_prod_pe <- ggplot() +
+    geom_sf(data = pe_sf, aes(fill = true_avg_sp_prod), color ="black") +
     scale_fill_gradient(low = "blue", high = "red", limits = lim) +
     theme_minimal() +
-    labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
+    labs(fill = "Tot Prod", title = paste("True Overall Productivity at", yr)) +
     theme_void()
   
-  return(p)
+  ##PE PRED
+  plot_pred_prod_pe <- ggplot() +
+    geom_sf(data = pe_sf, aes(fill = pred_h_avg_sp_prod), color ="black") +
+    scale_fill_gradient(low = "blue", high = "red", limits = lim) +
+    theme_minimal() +
+    labs(fill = "Tot Prod", title = paste("Predicted Overall Productivity at", yr)) +
+    theme_void()
+  
+  ggarrange(plot_true_prod_pe, plot_pred_prod_pe, common.legend = TRUE)
+  
 }
 
-## YEARLY
+## -----------------------------------------------------------
 
-prod <- tar_read(preds_pe)
-census <- tar_read(raw_geom_data_pe)
-time_of_interest <- as.Date("2024-05-01")  # replace with your desired date
-rastc <- unwrap(tar_read(cmip5_high_temp))
+gen_anim <- function() {
+  for(t in 109:157){  # for each year
+    plot(Preds_year(t))           # plot region at this year
+  }
+}
 
-prod_subset <- prod %>%
-  filter(Date == time_of_interest) %>%
-  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
-
-# Join the spatial data with the temperature data
-census_sf <- left_join(census, prod_subset, by = "GeoUID")
-
-lim = range(prod_subset$diff, na.rm = T)
-# Plot
-p1 = ggplot() +
-  geom_sf(data = census_sf, aes(fill = diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
-  theme_void()
-
-lim = range(census_sf$rel_diff, na.rm = T)
-# Plot
-ggplot() +
-  geom_sf(data = census_sf, aes(fill = rel_diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Relatve diff", title = paste("Diff b/w high and low relative to low", time_of_interest)) +
-  theme_void()
-
-## Aggregated productivity from 2022 to 2030
+ani.options(interval = 0.5)     # 0.2s interval between frames
+saveHTML(gen_anim(),            # run the main function
+         autoplay = FALSE,      # do not play on load
+         loop = FALSE,          # do not loop
+         verbose = FALSE,       # no verbose
+         outdir = ".",          # save to current dir
+         single.opts = "'controls': ['first', 'previous',
+                                    'play', 'next', 'last',
+                                     'loop', 'speed'],
+                                     'delayMin': 0",
+         htmlfile = "PEI_anim.html")  # save filename
 
 
-## NS diff plot
-## Monthly
-prod <- tar_read(preds_ns)
-census <- tar_read(raw_geom_data_ns)
-time_of_interest <- as.Date("2024-05-01")  # replace with your desired date
-rastc <- unwrap(tar_read(cmip5_high_temp))
 
-prod_subset <- prod %>%
-  filter(Date == time_of_interest) %>%
-  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+avg_prod <- pred %>%
+  group_by(t) %>%
+  summarise(true_avg_sp_prod = mean(tot_prod, na.rm = TRUE),
+            pred_h_avg_sp_prod = mean(pred_h_med, na.rm = TRUE),
+            pred_l_avg_sp_prod = mean(pred_l_med, na.rm = TRUE))
 
-# Join the spatial data with the temperature data
-census_sf <- left_join(census, prod_subset, by = "GeoUID")
-
-lim = range(prod_subset$diff, na.rm = T)
-# Plot
-p2 = ggplot() +
-  geom_sf(data = census_sf, aes(fill = diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
-  theme_void()
-
-lim = range(census_sf$rel_diff, na.rm = T)
-# Plot
-ggplot() +
-  geom_sf(data = census_sf, aes(fill = rel_diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Relatve diff", title = paste("Diff b/w high and low relative to low", time_of_interest)) +
-  theme_void()
-
-## NB diff plot
-## Monthly
-prod <- tar_read(preds_nb)
-census <- tar_read(raw_geom_data_nb)
-time_of_interest <- as.Date("2024-05-01")  # replace with your desired date
-rastc <- unwrap(tar_read(cmip5_high_temp))
-
-prod_subset <- prod %>%
-  filter(Date == time_of_interest) %>%
-  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
-
-# Join the spatial data with the temperature data
-census_sf <- left_join(census, prod_subset, by = "GeoUID")
-
-lim = range(prod_subset$diff, na.rm = T)
-# Plot
-p3 = ggplot() +
-  geom_sf(data = census_sf, aes(fill = diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
-  theme_void()
-
-lim = range(census_sf$rel_diff, na.rm = T)
-# Plot
-ggplot() +
-  geom_sf(data = census_sf, aes(fill = rel_diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Relatve diff", title = paste("Diff b/w high and low relative to low", time_of_interest)) +
-  theme_void()
-
-
-## ON diff plot
-## Monthly
-prod <- tar_read(preds_on)
-census <- tar_read(raw_geom_data_on)
-time_of_interest <- as.Date("2024-05-01")  # replace with your desired date
-rastc <- unwrap(tar_read(cmip5_high_temp))
-
-prod_subset <- prod %>%
-  filter(Date == time_of_interest) %>%
-  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
-
-# Join the spatial data with the temperature data
-census_sf <- left_join(census, prod_subset, by = "GeoUID")
-
-lim = range(prod_subset$diff, na.rm = T)
-# Plot
-p4 = ggplot() +
-  geom_sf(data = census_sf, aes(fill = diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
-  theme_void()
-
-lim = range(census_sf$rel_diff, na.rm = T)
-# Plot
-ggplot() +
-  geom_sf(data = census_sf, aes(fill = rel_diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
-  theme_minimal() +
-  labs(fill = "Relatve diff", title = paste("Diff b/w high and low relative to low", time_of_interest)) +
-  theme_void()
-
-
+ggplot(avg_prod) +
+  geom_point(aes(x = 1:nrow(avg_prod), y = true_avg_sp_prod)) +
+  geom_line(aes(x = 1:nrow(avg_prod), y = pred_l_avg_sp_prod), col = "blue") +
+  geom_line(aes(x = 1:nrow(avg_prod), y = pred_h_avg_sp_prod), col = "red") +
+  scale_x_continuous(breaks = seq(1, nrow(avg_prod), by = 12))
 

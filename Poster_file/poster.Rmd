@@ -1,29 +1,34 @@
 ---
 title: Bayesian spatio-temporal modelling for investigating the impacts of climate change on economic productivity
-subtitle: 
 author:
   - name: Jason Pekos
     affil: 1
   - name: Abhiroop Chowdhury
     affil: 1
-  - name: "Mentor: Dr.Pratheepa Jeganathan"
+  - name: "Mentor: Dr. Pratheepa Jeganathan"
     affil: 1
 
 affiliation:
   - num: 1
     address: Department of Mathematics and Statistics, McMaster University
 column_numbers: 3
-logoleft_name: crest.png
+body_textsize: "40px"
+sectitle_bgcol: "#940049"
+logoleft_name: mcmasterlogo.jpeg
+logoright_name: ssclogo.png
 output: 
   posterdown::posterdown_html:
     self_contained: false
 bibliography: packages.bib
 primary_colour: "#7A003C"
 secondary_colour: "#5E6A71"
-accent_colour: "#FDBF57"
+accent_colour: "#FFD700"
+author_textcol: "#E3BC9A"
+affiliation_textcol: "#FFD700"
+title_textsize: "60pt"
+author_textsize: "24pt"
 poster_height: "48in"
 poster_width: "72in"
-body_textsize: "30pt"
 ---
 
 ```{r setup, include=FALSE}
@@ -358,7 +363,7 @@ p_merge <- ggplot() +
   geom_sf(data = sk_sf, aes(fill = diff), color ="black") +
   geom_sf(data = nl_sf, aes(fill = diff), color ="black") +
   geom_sf(data = bc_sf, aes(fill = diff), color ="black") +
-  scale_fill_gradient(low = "blue", high = "orange", limits = lim) +
+  scale_fill_gradient(low = "blue", high = "red", limits = lim) +
   theme_minimal() +
   labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
   theme_void()
