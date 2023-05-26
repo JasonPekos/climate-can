@@ -1,5 +1,6 @@
 ---
-title: Bayesian spatio-temporal modelling of overall economic productivity
+title: Bayesian spatio-temporal modelling for investigating the impacts of climate change on economic productivity
+subtitle: 
 author:
   - name: Jason Pekos
     affil: 1
@@ -29,8 +30,14 @@ body_textsize: "30pt"
 knitr::opts_knit$set(root.dir = '..')
 library(targets)
 library(ggplot2)
+library(terra)
+library(dplyr)
+library(raster)
+library(purrr)
+library(tidyterra)
+library(patchwork)
+library(spdep)
 ```
-
 
 ```{r, include=FALSE}
 #| echo: FALSE
@@ -89,37 +96,31 @@ parsed <- ggplot() +
 
 # Background
 
+In an atmosphere of increased concern around anthropogenic climate change, questions naturally arise about the impact of our changing climate on industrial productivity.
 
-In an atmosphere of increased concern around anthropogenic climate change, questions naturally arise about the impact of 
-our changing climate on industrial productivity.
+Climate change manifests not only as increases in global mean temperature; high emissions scenarios also correspond with increased variability in climate events, as well as differing precipitation patterns.
 
-Climate change manifests not only as increases in global mean temperature;
-high emissions scenarios also correspond with increased variability in climate events, as
-well as differing precipitation patterns. 
-
-To examine the impact of these changes, we model productivity as a function of relevant climate variables in both 
-a low emission and high emission scenario. This allows us to compare model predictions across scenarios holding all else constant, naturally removing secular and seasonal trends in productivity at any given time-point. 
-
+To examine the impact of these changes, we model productivity as a function of relevant climate variables in both a low emission and high emission scenario. This allows us to compare model predictions across scenarios holding all else constant, naturally removing secular and seasonal trends in productivity at any given time-point.
 
 ## Objectives
 
-1. Fit a variety of model forms to historical climate and productivity data, performing model selection via WAIC and DIC. 
+1.  Fit a variety of model forms to historical climate and productivity data, performing model selection via WAIC and DIC.
 
-2. Use the posterior predictive distributions from the best-performing model(s) to forecast future productivity in response to CMIP5 climate predictions. 
+2.  Use the posterior predictive distributions from the best-performing model(s) to forecast future productivity in response to CMIP5 climate predictions.
 
-3. Build a reproducible workflow with the ability to use most modern pre-baked climate models as drop-in replacements for the standard Canadian CMIP5 ensemble. We also maintain flexibility around the specific form of the Bayesian GLM used, allowing further extensions with regards to spatial hierarchy and temporal dependence. This workflow also allows for the use of accelerated computing via the ComputeCanada clusters, with data and worker transfer handled automatically, ensuring that all work can be done from a local machine. 
+3.  Build a reproducible workflow with the ability to use most modern pre-baked climate models as drop-in replacements for the standard Canadian CMIP5 ensemble. We also maintain flexibility around the specific form of the Bayesian GLM used, allowing further extensions with regards to spatial hierarchy and temporal dependence. This workflow also allows for the use of accelerated computing via the ComputeCanada clusters, with data and worker transfer handled automatically, ensuring that all work can be done from a local machine.
 
 # Exploratory Analysis of Relevant Data
 
 ## Climate
 
-We chose to use the CMIP5 ensemble data over the other two relevant options: **(1)** building a custom smooth over provided weather station data, or **(2)** using a more modern climate model, e.g. a CMIP6 ensemble. The decision to use CMIP5 over CMIP6 comes down purely to data availability --- the government of Canada has not yet made it's CMIP6 ensemble available for bulk download. Recognizing that the practical utility of a project like this requires modern data, we built this project to allow such data to be used as a drop-in replacement at whatever time it becomes publicly available. 
+We chose to use the CMIP5 ensemble data over the other two relevant options: **(1)** building a custom smooth over provided weather station data, or **(2)** using a more modern climate model, e.g. a CMIP6 ensemble. The decision to use CMIP5 over CMIP6 comes down purely to data availability --- the government of Canada has not yet made it's CMIP6 ensemble available for bulk download. Recognizing that the practical utility of a project like this requires modern data, we built this project to allow such data to be used as a drop-in replacement at whatever time it becomes publicly available.
 
-The decision to not build a custom model over data from the provided weather stations came out of a recognition that such model would necessarily perform poorly, as it could not possibly take into account relevant geological factors --- e.g. mountain ranges, weather patterns, and water coverage (lakes and oceans). Using climate model data also allows us to compute the posterior predictive distribution at future time-points, something not possible with only historical weather data. 
+The decision to not build a custom model over data from the provided weather stations came out of a recognition that such model would necessarily perform poorly, as it could not possibly take into account relevant geological factors --- e.g. mountain ranges, weather patterns, and water coverage (lakes and oceans). Using climate model data also allows us to compute the posterior predictive distribution at future time-points, something not possible with only historical weather data.
 
 ### Historical Data and Future Predictions:
 
-Historical data is provided as a single monthly trend of `1x1` degree spatial cells. At the time in which the CMIP5 model was computed --- Jan 1st, 2006 --- the output splits into two trends representing different climate scenarios, in the same format as the historical data. 
+Historical data is provided as a single monthly trend of `1x1` degree spatial cells. At the time in which the CMIP5 model was computed --- Jan 1st, 2006 --- the output splits into two trends representing different climate scenarios, in the same format as the historical data.
 
 ```{r, out.width='80%', fig.align='center', fig.cap='CMIP5 Data', fig.height=3.5}
 #| echo: FALSE
@@ -132,12 +133,9 @@ library(targets)
 
 
 # Compute historical trend over all cells:
-
 means <- tar_read(mean_trends) 
-
 i1 <- length(means$hist$mean)
 i2 <- length(means$high$mean)
-
 # Plot
 p1 <- ggplot() +
   geom_line(aes(x = 1:i1, y = means$hist$mean), color = "blue") + 
@@ -147,74 +145,274 @@ p1 <- ggplot() +
   xlab("Days Since 1999") +
   ylab("Temp - C") + 
   ggtitle("Relationship Between Different Climate Scenarios")
-
-
 p2 <- ggplot() +
-  geom_line(aes(x = (i1+1):(i1+i2), y = (means$high$mean - means$low$mean)), color = "green", linetype = "twodash") + 
+  geom_line(aes(x = (i1+1):(i1+i2),
+                y = (means$high$mean - means$low$mean),
+                color = (means$high$mean - means$low$mean))) + 
+  scale_color_gradient2(low = "blue", mid = "purple", high = "red", midpoint = 0) +
   theme_bw() + 
   xlab("Days Since 1999") +
   ylab("Differenced Avg — Scenarios") + 
-  ggtitle("Different Climate Scenarios Predict Different Outcomes")
-  
+  ggtitle("Different Climate Scenarios Predict Different Outcomes") + 
+  theme(legend.position = "none")  
+
 
  p1 / p2 
 ```
 
+<br>
 
-## Productivity
+<br>
 
-I should put a productivity thing here:
+<br>
 
-One More line
-
-
+<br>
 
 # Results
 
-The Big Results Map Goes Here:
-
-
-```{r, out.width='80%', fig.align='center', fig.cap='Processing Data', fig.height=5}
+```{r, out.width='80%', fig.align='center', fig.cap='Difference of predicted productivity for high and low emissions at May, 2025', fig.height=3.5}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
+library(targets)
 
-preparsed
+sf_use_s2(FALSE)
+time_of_interest <- as.Date("2025-05-01")  # replace with your desired date
+
+########
+## PEI
+########
+prod <- tar_read(preds_pe)
+census <- tar_read(raw_geom_data_pe)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+pe_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+#limits of PEI
+lim_pe = range(prod_subset$diff, na.rm = T)
+
+##########
+## NS
+#########
+prod <- tar_read(preds_ns)
+census <- tar_read(raw_geom_data_ns)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+ns_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_ns = range(prod_subset$diff, na.rm = T)
+
+##########
+## NB
+##########
+prod <- tar_read(preds_nb)
+census <- tar_read(raw_geom_data_nb)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+nb_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_nb = range(prod_subset$diff, na.rm = T)
+
+###########
+## ON
+##########
+prod <- tar_read(preds_on)
+census <- tar_read(raw_geom_data_on)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+on_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_on = range(prod_subset$diff, na.rm = T)
+
+########
+## AB
+########
+prod <- tar_read(preds_ab)
+census <- tar_read(raw_geom_data_ab)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+ab_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_ab = range(prod_subset$diff, na.rm = T)
+
+#######
+## MB 
+#######
+prod <- tar_read(preds_mb)
+census <- tar_read(raw_geom_data_mb)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+mb_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_mb = range(prod_subset$diff, na.rm = T)
+
+#####
+## QC
+#####
+prod <- tar_read(preds_qc)
+census <- tar_read(raw_geom_data_qc)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+qc_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_qc = range(prod_subset$diff, na.rm = T)
+
+#####
+## BC
+#####
+prod <- tar_read(preds_bc)
+census <- tar_read(raw_geom_data_bc)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+bc_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_bc = range(prod_subset$diff, na.rm = T)
+
+#####
+## NL
+#####
+prod <- tar_read(preds_nl)
+census <- tar_read(raw_geom_data_nl)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+nl_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_nl = range(prod_subset$diff, na.rm = T)
+
+#####
+## SK
+#####
+prod <- tar_read(preds_sk)
+census <- tar_read(raw_geom_data_sk)
+rastc <- unwrap(tar_read(cmip5_high_temp))
+
+prod_subset <- prod %>%
+  filter(Date == time_of_interest) %>%
+  mutate(GeoUID = as.character(GeoUID)) # Convert GeoUID to character
+
+# Join the spatial data with the temperature data
+sk_sf <- left_join(census, prod_subset, by = "GeoUID")
+
+lim_sk = range(prod_subset$diff, na.rm = T)
+
+## Full Plot
+## Monthly
+lb_lim = min(lim_ab[1], lim_on[1], lim_ns[1], lim_nb[1], lim_on[1], lim_mb[1], lim_qc[1], lim_bc[1], lim_nl[1], lim_sk[1])
+ub_lim = max(lim_ab[2], lim_on[2], lim_ns[2], lim_nb[2], lim_on[2], lim_mb[2], lim_qc[2], lim_bc[2], lim_nl[2], lim_sk[2])
+
+lim = c(lb_lim, ub_lim)
+
+p_merge <- ggplot() +
+  geom_sf(data = pe_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = ns_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = nb_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = ab_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = on_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = mb_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = qc_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = sk_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = nl_sf, aes(fill = diff), color ="black") +
+  geom_sf(data = bc_sf, aes(fill = diff), color ="black") +
+  scale_fill_gradient(low = "blue", high = "orange", limits = lim) +
+  theme_minimal() +
+  labs(fill = "Diff", title = paste("Diff b/w high and low", time_of_interest)) +
+  theme_void()
+
+p_merge
 
 ```
 
-
 # Model:
 
+Assuming economic productivity across all industrial classes have equal importance, we define `overall economic productivity` for a census region census to be the mean productivity of all industrial classes over that census region, which is our response and monthly mean temperature and total precipitation are our covariates.
+
+Our top data model for $K$ census regions and $T$ timepoints is given by:
+
+\[
+  \underbrace{Y_{kt}}_\text{overall economic productivity} = 
+    \underbrace{x_{kt}^T\beta}_\text{spatio-temporal covariate fixed effects} 
+      + \underbrace{\psi_{kt}}_\text{spatio-temporal random effects} + \underbrace{\epsilon_{kt}}_\text{nugget effect} \ \  \text{for} \ \ k = 1, \ldots, K, \ \ t = 1, \ldots, T,
+\]
+
+where $Y_{kt} \sim \text{N}(x_{kt}^T\beta + \psi_{kt}, \nu^2), \ \beta \sim \text{N}(\mu_{\beta}, \Sigma_{\beta}), \ \nu^2 \sim \text{Inv-Gamma}(a,b).$ We consider 4 different models for the spatio-temporally random effects namely a) Spatially varying linear model of trend b) Anova style decomposition c) Spatio-temporal AR(1) model and d) Spatio-temporal AR(2) model. For example, the AR(1) model is given as:
+
+\[
+\begin{align*}
+      \psi_t | \psi_{t-1} &\sim \text{N}(\rho_T\psi_{t-1}, \tau^2 Q(W, \rho_S)^{-1}) \ \ \ \ \ t = 2, \ldots, T, \\
+      \psi_1 &\sim \text{N}(0, \tau^2 Q(W, \rho_S)^{-1}), \\
+      \tau^2 &\sim \text{Inv-Gamma}(a,b), \\
+      \rho_S, \rho_T &\sim \text{Uniform}(0,1)
+\end{align*}
+\]
 
 # Methods:
 
-## Arial Unit Preprocessing 
+## Areal Unit Preprocessing
 
-Productivity is only available on the level of census regions --- irregular polygons, or sets of polygons. Alternatively, 
-CMIP5 climate data is available on the level of `1x1` degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data. 
+Productivity is only available on the level of census regions --- irregular polygons, or sets of polygons. Alternatively, CMIP5 climate data is available on the level of `1x1` degree grids. We aggregate the CMIP5 data by computing masks for each census region, which we then use to extract the relevant CMIP5 cells for that region. We can then average over the cells to compute a mean temperature time series corresponding the the provided productivity data.
 
-It's also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting. 
+It's also necessary to provide a spatial connection matrix to most models; we use the census data to construct this, indexed by shared GeoUID, allowing for easy model fitting.
 
-
-```{r, out.width='80%', fig.align='center', fig.cap='Processing Data', fig.height=3}
+```{r, out.width='80%', fig.align='center', fig.cap='CMIP predictions for PEI at January, 1991', fig.height=2.5}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
-
 
 preparsed + parsed #comment
 ```
 
-
 ## Automatic Workflow
 
-We leverage `targets` --- a make-like utility in R --- to build a reproducible scientific workflow for our modelling process. 
+We leverage `targets` --- a make-like utility in R --- to build a reproducible scientific workflow for our modelling process.
 
+This allows us to easily swap out components of our modelling pipeline --- for example, different climate models, different productivity data, or different predictive models --- while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH.
 
-This allows us to easily swap out components of our modelling pipeline --- for example, different climate models, different productivity data, or different predictive models --- while only recomputing the sections of our pipeline that change. We augment this workflow with a one-line replacement that allows specified compute-intensive jobs to be sent away to be performed on a ComputeCanada cluster via SSH. 
-
-In the interest of reproducible science, everything related to this submission --- including this poster itself, and all graphics and model output included inside --- can be remade in a one-line R command: 
+In the interest of reproducible science, everything related to this submission --- including this poster itself, and all graphics and model output included inside --- can be remade in a one-line R command:
 
 ```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=5, message=FALSE, warning=FALSE}
 #| echo: FALSE
@@ -234,12 +432,9 @@ q <- tar_visnetwork(exclude = c("tidy_climate", ".Random.seed", "tidy_geom", "ge
 q 
 ```
 
+# Diagnostics and Model Selection: using PEI as an Illustrative example
 
-
-# Diagnostics and Model Selection
-
-  
-```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=5, message=FALSE, warning=FALSE}
+```{r, out.width='80%', fig.align='center', fig.cap='Table showing model comparison crieria values and model validation statistic values', fig.height=4, message=FALSE, warning=FALSE}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
@@ -247,7 +442,7 @@ q
 knitr::kable(tar_read(results_table_pe))
 ```
 
-```{r, out.width='80%', fig.align='center', fig.cap='Network Viz', fig.height=2, message=FALSE, warning=FALSE}
+```{r, out.width='80%', fig.align='center', fig.cap='Barplots comparing DIC, WAIC and validation statistics', fig.height=2, message=FALSE, warning=FALSE}
 #| echo: FALSE
 #| message: FALSE
 #| warning: FALSE
@@ -255,6 +450,11 @@ knitr::kable(tar_read(results_table_pe))
 tar_read(model_comp_plots_pe)
 ```
 
+```{r, out.width='90%', fig.align='center', fig.cap='Model diagnostic plots', fig.height=2, message=FALSE, warning=FALSE}
+#| echo: FALSE
+#| message: FALSE
+#| warning: FALSE
+tar_read(chainsplot)
+```
 
-
-# References
+# Conclusion

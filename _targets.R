@@ -399,18 +399,18 @@ list(
                create_neighborhood_matrix(nb_results$nb)
              }
   ),
-  # tar_target(name = weightmat_bc,
-  #            command = {
-  #              nb_results <- create_neighbors_list(raw_geom_data_bc, bc_ts)
-  #              create_neighborhood_matrix(nb_results$nb)
-  #            }
-  # ),
-  # tar_target(name = weightmat_nl,
-  #            command = {
-  #              nb_results <- create_neighbors_list(raw_geom_data_nl, nl_ts)
-  #              create_neighborhood_matrix(nb_results$nb)
-  #            }
-  # ),
+  tar_target(name = weightmat_bc,
+              command = {
+                nb_results <- create_neighbors_list(raw_geom_data_bc, bc_ts)
+                create_neighborhood_matrix(nb_results$nb)
+              }
+  ),
+  tar_target(name = weightmat_nl,
+              command = {
+                nb_results <- create_neighbors_list_snap(raw_geom_data_nl, nl_ts)
+                create_neighborhood_matrix(nb_results$nb)
+              }
+  ),
   tar_target(name = weightmat_ab,
              command = {
                nb_results <- create_neighbors_list(raw_geom_data_ab, ab_ts)
@@ -437,7 +437,7 @@ list(
   ),
   tar_target(name = weightmat_qc,
              command = {
-               nb_results <- create_neighbors_list(raw_geom_data_qc, qc_ts)
+               nb_results <- create_neighbors_list_snap(raw_geom_data_qc, qc_ts)
                create_neighborhood_matrix(nb_results$nb)
              }
   ),
@@ -1171,15 +1171,10 @@ list(
     name = preds_pe, #change province here
     command = {
       test <- pe_ts #change province here
-      
-      #change province here
-      train <- pe_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
+
       #change province here
       test <- pe_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1198,18 +1193,19 @@ list(
                          N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
         
         # Get the predictions
-        tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-        tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+        pred_h <- apply(high$fit$samples$Y, 2, mean)
+        pred_l <- apply(low$fit$samples$Y, 2, mean)
         
-        # Add the predictions with the pe_model dataframe
-        pred_h <- c(train$tot_prod, tot_prod_preds_high)
-        pred_l <- c(train$tot_prod, tot_prod_preds_low)
-        
+        diff <- pred_h - pred_l
+          
         #change province here
-        pred <- cbind(pe_ts, pred_h, pred_l) %>%
-          mutate(
-            diff = pred_h - pred_l,
-            rel_diff = (pred_h - pred_l)/abs(pred_l))
+        pred <- pe_ts %>%
+          filter(!Date < "2006-01-01")  %>%
+          dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+          mutate(pred_h = pred_h,
+                 pred_l = pred_l,
+                 diff = diff,
+                 rel_diff = diff/abs(pred_l))
         pred
     }
   ),
@@ -1217,14 +1213,11 @@ list(
   tar_target(
     name = preds_ns,
     command = {
-      test <- ns_ts
+      test <- ns_ts #change province here
       
-      train <- ns_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
+      #change province here
       test <- ns_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1233,7 +1226,7 @@ list(
       form_high <- tot_prod_na ~ mean_temp_high + mean_pcp_high
       form_low <- tot_prod_na ~ mean_temp_low + mean_pcp_low
       
-      # Fit
+      # Fit: change weight matrices for provinces
       high <- Bcartime(formula=form_high, data=test, scol= "s", tcol= "t",
                        W=weightmat_ns, model="ar", AR =2, family="gaussian", package="CARBayesST",
                        N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
@@ -1243,17 +1236,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
-      pred <- cbind(ns_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      #change province here
+      pred <- ns_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1261,14 +1256,11 @@ list(
   tar_target(
     name = preds_nb,
     command = {
-      test <- nb_ts
+      test <- nb_ts #change province here
       
-      train <- nb_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
+      #change province here
       test <- nb_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1277,7 +1269,7 @@ list(
       form_high <- tot_prod_na ~ mean_temp_high + mean_pcp_high
       form_low <- tot_prod_na ~ mean_temp_low + mean_pcp_low
       
-      # Fit
+      # Fit: change weight matrices for provinces
       high <- Bcartime(formula=form_high, data=test, scol= "s", tcol= "t",
                        W=weightmat_nb, model="ar", AR =2, family="gaussian", package="CARBayesST",
                        N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
@@ -1287,17 +1279,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
-      pred <- cbind(nb_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      #change province here
+      pred <- nb_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1308,13 +1302,8 @@ list(
       test <- ab_ts #change province here
       
       #change province here
-      train <- ab_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- ab_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1333,18 +1322,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(ab_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- ab_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1363,13 +1353,8 @@ list(
       test <- sk_ts #change province here
       
       #change province here
-      train <- sk_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- sk_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1388,18 +1373,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(sk_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- sk_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1410,13 +1396,8 @@ list(
       test <- mb_ts #change province here
       
       #change province here
-      train <- mb_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- mb_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1435,18 +1416,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(mb_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- mb_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1457,13 +1439,8 @@ list(
       test <- on_ts #change province here
       
       #change province here
-      train <- on_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- on_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1482,18 +1459,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(on_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- on_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1504,13 +1482,8 @@ list(
       test <- qc_ts #change province here
       
       #change province here
-      train <- qc_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- qc_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1529,18 +1502,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(qc_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- qc_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1551,13 +1525,8 @@ list(
       test <- bc_ts #change province here
       
       #change province here
-      train <- bc_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- bc_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1576,18 +1545,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(bc_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- bc_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1598,13 +1568,8 @@ list(
       test <- nl_ts #change province here
       
       #change province here
-      train <- nl_ts %>%
-        filter(Date < "2006-01-01") %>%
-        dplyr::select(GeoUID, Date, tot_prod, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s)
-      
-      #change province here
       test <- nl_ts %>%
-        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, tot_prod, tot_prod_na, t, s)
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na)
       
       #Impute missing covariates
       test[,3:6] <- apply(test[,3:6], 2, na_interpolation, option = "spline")
@@ -1623,18 +1588,19 @@ list(
                       N=mcmc_pars$samples, burn.in=mcmc_pars$burnin, thin=mcmc_pars$thin)
       
       # Get the predictions
-      tot_prod_preds_high <- apply(high$fit$samples$Y, 2, mean)
-      tot_prod_preds_low <- apply(low$fit$samples$Y, 2, mean)
+      pred_h <- apply(high$fit$samples$Y, 2, mean)
+      pred_l <- apply(low$fit$samples$Y, 2, mean)
       
-      # Add the predictions with the pe_model dataframe
-      pred_h <- c(train$tot_prod, tot_prod_preds_high)
-      pred_l <- c(train$tot_prod, tot_prod_preds_low)
+      diff <- pred_h - pred_l
       
       #change province here
-      pred <- cbind(nl_ts, pred_h, pred_l) %>%
-        mutate(
-          diff = pred_h - pred_l,
-          rel_diff = (pred_h - pred_l)/abs(pred_l))
+      pred <- nl_ts %>%
+        filter(!Date < "2006-01-01")  %>%
+        dplyr::select(GeoUID, Date, mean_temp_high, mean_temp_low, mean_pcp_high, mean_pcp_low, t, s, tot_prod, tot_prod_na) %>%
+        mutate(pred_h = pred_h,
+               pred_l = pred_l,
+               diff = diff,
+               rel_diff = diff/abs(pred_l))
       pred
     }
   ),
@@ -1672,8 +1638,31 @@ list(
       out <- plots[[1]] | plots[[2]] | plots[[3]] | plots[[4]] | plots[[5]] | plots[[6]]
     }
   ),
-  
-  
+  tar_target(
+    name = chainsplot,
+    command = {
+      vector <- model_fit_nb[[4]]$fit$samples$beta[,2]
+      
+      chains <- ggplot() + 
+        geom_line(aes(x = 1:length(vector), y = vector)) +
+        theme_minimal() +
+        ggtitle("Chain - Mean Temperature Fixed Effect") +
+        xlab("Samples") + 
+        ylab("Parameter Value")
+      
+      
+      hist <- ggplot() +
+        geom_histogram(aes(y = vector), fill = "#6497b1", color = "#011f4b") +
+        xlab("") +
+        ylab("") +
+        theme(axis.text = element_blank(),
+              axis.ticks = element_blank()) +
+        theme_minimal()
+      
+      chains + hist + plot_layout(widths = c(8 ,2))
+      
+    }
+  ),
   tar_render(name = poster,
             "Poster_file/poster.rmd"
   )
