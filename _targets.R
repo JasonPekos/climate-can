@@ -451,7 +451,7 @@ list(
   tar_target(
     name = mcmc_pars,
     command = list(
-      "samples" = 40000,
+      "samples" = 30000,
       "burnin" = 10000,
       "thin" = 10
     )
